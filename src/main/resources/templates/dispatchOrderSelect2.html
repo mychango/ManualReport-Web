@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="tw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>報工系統</title>
+    <link th:href="@{/assets/plugins/datatables/css/jquery.dataTables.min.css}" rel="stylesheet" type="text/css" />
+</head>
+<body>
+    <div class="topbar-container">
+        <div class="topbar-identity">
+            <p th:text="'(' + ${session.area} + ')' + ${session.nickName}"></p>
+        </div>
+        <div class="topbar-status">
+            <h2>工作準備(選擇工單)</h2>
+        </div>
+        <form th:action="@{/logout}" method="POST">
+            <div class="topbar-function">
+                <button class="top-btn" id="logout-btn">登出</button>
+            </div>
+        </form>
+    </div>
+    <div class="dispatch-order-container">
+        <table class="table-list display" id="dispatch-order-table" role="grid">
+            <thead>
+                <tr>
+                    <th>製令編號</th>
+                    <th>派工單號</th>
+                    <th>工件料號</th>
+                    <th>數量</th>
+                    <th>工單狀態</th>
+                    <th>預計完成時間</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="m:${listOpDispatchOrder}" row="role" th:class="${m.dispatchId}">
+                    <td th:text="${m.mfgorderId}"></td>
+                    <td th:text="${m.dispatchId}"></td>
+                    <td th:text="${m.materialId}"></td>
+                    <td th:text="${m.totalCnt}"></td>
+                    <td th:text="${m.status}"></td>
+                    <td th:text="${m.expectFinishDt}"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="bottom-button-container">
+        <div>
+            <button class="op-btn" id="manual-keyin-btn">手動輸入</button>
+        </div>
+        <div>
+            <button class="op-btn" id="select-task-btn">選定工作</button>
+        </div>
+    </div>
+    <script th:src="@{/assets/plugins/jquery/jquery.js}" type="text/javascript"></script>
+    <script th:src="@{/assets/plugins/datatables/jquery.dataTables.js}" type="text/javascript"></script>
+
+    <script>
+        var dt;
+        var selectedData;
+        var materialId = null;
+        var totalCnt = null;
+
+        $(document).ready(function() {
+            dt = $('#dispatch-order-table').DataTable();
+    
+            // 選取 datatable 的 implementation
+            $('#dispatch-order-table tbody').on( 'click', 'tr', function () {
+                if ( $(this).hasClass('selected') ) {
+                    $(this).removeClass('selected');
+                }
+                else {
+                    dt.$('tr.selected').removeClass('selected');
+                    $(this).addClass('selected');
+                }                
+                materialId = dt.rows('.selected').data()[0][2];
+                totalCnt = dt.rows('.selected').data()[0][3];
+            } );
+        } );
+
+        var urlParts = location.href.toString().split("/");
+        var target = location.href.toString().replace(urlParts[urlParts.length-1], "workStatus");
+
+        $('#select-task-btn').on('click', function(){
+            // 導向 task/confirmTask 並把選定的工作料號+數量參數帶過去
+            window.location.href = target + "?materialId=" + materialId + "&totalCnt=" + totalCnt;;
+        });
+
+        $('#manual-keyin-btn').on('click', function(){
+            // 導向 task/confirmTask 不帶參數
+            window.location.href = target;
+        });
+
+    </script>
+</body>
+</html>

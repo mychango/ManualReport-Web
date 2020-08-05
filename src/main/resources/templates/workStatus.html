@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="tw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>報工系統</title>
+</head>
+<body>
+    <div class="topbar-container">
+        <div class="topbar-identity">
+            <p th:text="'(' + ${session.area} + ')' + ${session.nickName}"></p>
+        </div>
+        <div class="topbar-status">
+            <h2>工作準備(手動輸入)</h2>
+        </div>
+        <form th:action="@{/logout}" method="POST" id="logout-form">
+            <div class="topbar-function">
+                <button class="top-btn" id="logout-btn">登出</button>
+            </div>
+        </form>
+    </div>
+    <div class="task-info-container">
+        <div class="task-info-material">
+            <input th:if="${materialId != null}" th:value="${materialId}" class="task-info-text" type="text" name="keyinId" id="keyinId">
+            <input th:if="${materialId == null}" class="task-info-text" type="text" placeholder="請輸入料號" name="keyinId" id="keyinId">
+        </div>
+        <div class="task-info-material">
+            <input th:if="${totalCnt != null}" th:value="${totalCnt}" class="task-info-text" type="text" name="expectCnt" id="expectCnt">
+            <input th:if="${totalCnt == null}" class="task-info-text" type="text" placeholder="預計完成數量" name="expectCnt" id="expectCnt">
+        </div>
+    </div>
+    <div class="confirm-work-container">
+        <div>
+            <button class="op-btn" id="back-list-btn" onclick="goBackAndRefresh()">返回列表</button>
+        </div>
+        <div>
+            <button class="op-btn" id="confirm-task-btn">確認工作</button>
+        </div>
+    </div>
+    <div class="work-action-container" style="display: none;">
+        <div>
+            <button class="op-btn" id="pause-work-btn">暫停工作</button>
+        </div>
+        <div>
+            <button class="op-btn" id="error-occur-btn">發生異常</button>
+        </div>
+        <div>
+            <button class="op-btn" id="finish-work-btn">完成工作</button>
+        </div>
+    </div>
+    <script th:src="@{/assets/plugins/jquery/jquery.js}" type="text/javascript"></script>
+    <script>
+
+        function goBackAndRefresh(){
+            window.history.back();
+        }
+
+        $('#confirm-task-btn').on('click', function(){
+            if ($(this).hasClass('start')) {
+                //開始工作後disable登出button
+                $("#logout-btn").attr("disabled", true);
+                //隱藏確認工作功能按鈕，開啟工作中按鈕
+                $(".confirm-work-container").css("display", "none");
+                $(".work-action-container").css("display", "block");
+                $(".topbar-status h2").text("工作進行");    //表示已經進入工作頁面，不得返回
+                //1.insert DB to work_log
+                $.ajax({
+
+                });
+
+                //2.進入新的頁面
+
+                
+            } else {
+                document.getElementById("keyinId").disabled = true;
+                document.getElementById("expectCnt").disabled = true;
+                $(this).text("開始工作");
+                $(this).addClass("start");
+            }
+        });
+
+        
+
+    </script>
+
+</body>
+</html>

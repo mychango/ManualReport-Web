@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="tw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>報工系統</title>
+<!--    <link rel="stylesheet" href="assets/plugins/fontawesome-free/css/all.css">-->
+</head>
+<body>
+    <div class="top-bar-container">
+        <h3 class="top-bar-title" style='font-size:20px;'>登入頁面</h3>
+    </div>
+    <div class="login-title-container">
+        <h3 class="login-title" style='font-size:20px;'>報工系統</h3>
+        <h4 class="login-title" style='font-size:20px;'>Manual Report System</h4>
+    </div>
+    <form th:action="@{/login}" method="POST">
+        <div class="input-group">
+            <input class="login-form" type="text" placeholder="帳號" name="username" autocomplete="off">
+        </div>
+        <div class="input-group">
+            <input class="login-form" type="password" placeholder="密碼" name="password">
+        </div>
+        <div class="login-action">
+            <button id="login-btn" class="op-btn">登入</button>
+        </div>
+    </form>
+    <div th:if="${param.error}">
+        <span>Invalid account or password</span>
+    </div>
+<!--    <script>-->
+<!--        var handleSignInFormSubmit = function() {-->
+<!--            $('#manual-report-login-submit').click(function(e) {-->
+<!--                e.preventDefault();-->
+<!--                var btn = $(this);-->
+<!--                var form = $(this).closest('form');-->
+
+<!--                form.validate({-->
+<!--                    rules: {-->
+<!--                        email: {-->
+<!--                            required: false,-->
+<!--                            email: false-->
+<!--                        },-->
+<!--                        password: {-->
+<!--                            required: false-->
+<!--                        }-->
+<!--                    }-->
+<!--                });-->
+
+<!--                if (!form.valid()) {-->
+<!--                    return;-->
+<!--                }-->
+<!--                btn.attr('disabled', true);-->
+<!--            });-->
+<!--        }-->
+<!--    </script>-->
+</body>
+</html>

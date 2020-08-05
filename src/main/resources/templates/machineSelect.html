@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="tw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>報工系統</title>
+</head>
+<body>
+    <div class="topbar-container">
+        <div class="topbar-identity">
+            <p th:text="'(' + ${session.area} + ')' + ${session.nickName}"></p>
+        </div>
+        <div class="topbar-status">
+            <h2>工作準備(選擇機台)</h2>
+        </div>
+        <form th:action="@{/logout}" method="POST">
+            <div class="topbar-function">
+                <button class="top-btn" id="logout-btn">登出</button>
+            </div>
+        </form>
+    </div>
+    <div class="mainframe-container">
+        <form th:action="@{/task/dpOrderSelect}" method="POST">
+            <div class="machine-selector-container">
+                <label>選擇操作設備</label>
+                <select name="selectMachine" id="selectMachine">
+                    <option value="all">全部機台</option>
+                    <option th:each="list:${listMachineInfo}" th:value="${list.machineId}" th:text="${list.machineId}"></option>
+                </select>
+            </div>
+            <div>
+                <input type="hidden" th:name="selectWorker" th:value="${session.nickName}">
+            </div>
+            <div class="machine-confirm-container">
+                <button class="confirm-button">確認設備</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

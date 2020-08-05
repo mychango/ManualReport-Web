@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="tw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>報工系統</title>
+    <link th:href="@{/assets/plugins/datatables/css/jquery.dataTables.min.css}" rel="stylesheet" type="text/css" />
+</head>
+<body>
+    <div class="topbar-container">
+        <div class="topbar-identity">
+            <p th:text="'(' + ${session.area} + ')' + ${session.nickName}"></p>
+        </div>
+        <div class="topbar-status">
+            <h2>工作準備(選擇工單)</h2>
+        </div>
+        <form th:action="@{/logout}" method="POST">
+            <div class="topbar-function">
+                <button class="logout-button">登出</button>
+            </div>
+        </form>
+    </div>
+    <div class="dispatch-order-container">
+        <table class="table-list" id="dispatch-order-table" role="grid">
+            <thead>
+                <tr>
+                    <th>製令編號</th>
+                    <th>派工單號</th>
+                    <th>工件料號</th>
+                    <th>數量</th>
+                    <th>工單狀態</th>
+                    <th>預計完成時間</th>
+                </tr>
+            </thead>
+            <tbody>
+<!--                <tr th:each="m:${listOpDispatchOrder}" row="role" th:class="${m.dispatchId}">-->
+                <tr th:each="m:${dispatchOrderPage.content}" row="role" th:class="${m.dispatchId}">
+                    <td><div class="tbword" th:text="${m.mfgorderId}"></div></td>
+                    <td><div class="tbword" th:text="${m.dispatchId}"></div></td>
+                    <td><div class="tbword" th:text="${m.materialId}"></div></td>
+                    <td><div class="tbword" th:text="${m.totalCnt}"></div></td>
+                    <td><div class="tbword" th:text="${m.status}"></div></td>
+                    <td><div class="tbword" th:text="${m.expectFinishDt}"></div></td>
+                </tr>
+            </tbody>
+        </table>
+        <div th:if="${dispatchOrderPage.totalPages > 0}" class="pagination"
+             th:each="pageNumber : ${pageNumbers}">
+            <a th:href="@{/listDispatchOrder(selectMachine=${machine}, page=${pageNumber}, selectWorker=${worker})}"
+               th:text=${pageNumber}
+               th:class="${pageNumber == dispatchOrderPage.number + 1} ? active"></a>
+        </div>
+    </div>
+    <script th:src="@{/assets/plugins/jquery/jquery.js}" type="text/javascript"></script>
+    <script th:src="@{/assets/plugins/datatables/jquery.dataTables.js}" type="text/javascript"></script>
+
+    <script>
+        $(document).ready(function() {
+            var dt = $('#dispatch-order-table').DataTable();
+    
+            $('#dispatch-order-table tbody').on( 'click', 'tr', function () {
+                if ( $(this).hasClass('selected') ) {
+                    $(this).removeClass('selected');
+                }
+                else {
+                    table.$('tr.selected').removeClass('selected');
+                    $(this).addClass('selected');
+                }
+            } );
+        } );
+    </script>
+</body>
+</html>
