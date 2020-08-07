@@ -25,7 +25,6 @@ public class MRSLoginSuccessHandler implements AuthenticationSuccessHandler {
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Authentication authentication) throws IOException, ServletException {
-        logger.info("Login successfully and ready to redirect!");
 //        Collection<? extends GrantedAuthority> authorities
 //                = authentication.getAuthorities();
 //        logger.info("Number of authorities: " + authorities.size());

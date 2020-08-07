@@ -8,7 +8,8 @@
 <body>
     <div class="topbar-container">
         <div class="topbar-identity">
-            <p th:text="'(' + ${session.area} + ')' + ${session.nickName}"></p>
+            <p id="top-worker-info" th:if="${session.machineId} == null" th:text="${session.area} + '/' + ${session.nickName}"></p>
+            <p id="top-worker-info" th:if="${session.machineId} != null" th:text="${session.area} + '/' + ${session.nickName} + '/' + ${session.machineId}"></p>
         </div>
         <div class="topbar-status">
             <h2>工作準備(手動輸入)</h2>
@@ -19,67 +20,352 @@
             </div>
         </form>
     </div>
-    <div class="task-info-container">
-        <div class="task-info-material">
-            <input th:if="${materialId != null}" th:value="${materialId}" class="task-info-text" type="text" name="keyinId" id="keyinId">
-            <input th:if="${materialId == null}" class="task-info-text" type="text" placeholder="請輸入料號" name="keyinId" id="keyinId">
+    <div class="mainframe-container">
+        <div class="task-info-container">
+            <div class="task-info-material">
+                <input class="task-info-text" type="text" placeholder="請輸入料號" name="keyinId" id="keyinId">
+            </div>
+            <div class="task-info-material">
+                <input class="task-info-text" type="text" placeholder="預計完成數量" name="expectCnt" id="expectCnt">
+            </div>
         </div>
-        <div class="task-info-material">
-            <input th:if="${totalCnt != null}" th:value="${totalCnt}" class="task-info-text" type="text" name="expectCnt" id="expectCnt">
-            <input th:if="${totalCnt == null}" class="task-info-text" type="text" placeholder="預計完成數量" name="expectCnt" id="expectCnt">
+        <div class="bottom-button-container confirm-work-container">
+            <div>
+                <button class="op-btn" id="back-list-btn" onclick="goBackAndRefresh()">返回列表</button>
+            </div>
+            <div>
+                <button class="op-btn" id="confirm-task-btn">確認工作</button>
+            </div>
         </div>
-    </div>
-    <div class="confirm-work-container">
-        <div>
-            <button class="op-btn" id="back-list-btn" onclick="goBackAndRefresh()">返回列表</button>
-        </div>
-        <div>
-            <button class="op-btn" id="confirm-task-btn">確認工作</button>
-        </div>
-    </div>
-    <div class="work-action-container" style="display: none;">
-        <div>
-            <button class="op-btn" id="pause-work-btn">暫停工作</button>
-        </div>
-        <div>
-            <button class="op-btn" id="error-occur-btn">發生異常</button>
-        </div>
-        <div>
-            <button class="op-btn" id="finish-work-btn">完成工作</button>
+        <div class="bottom-button-container work-action-container" style="display: none;">
+            <div>
+                <button class="op-btn" id="pause-work-btn">暫停工作</button>
+            </div>
+            <div>
+                <button class="op-btn" id="error-occur-btn">發生異常</button>
+            </div>
+            <div>
+                <button class="op-btn" id="finish-work-btn">完成工作</button>
+            </div>
         </div>
     </div>
     <script th:src="@{/assets/plugins/jquery/jquery.js}" type="text/javascript"></script>
+    <script th:src="@{/assets/plugins/dist/sweetalert2.all.min.js}" type="text/javascript"></script>
     <script>
 
+        // 回上一頁，目前尚有重新提交表單的問題 (WELD之外)
         function goBackAndRefresh(){
             window.history.back();
         }
 
-        $('#confirm-task-btn').on('click', function(){
-            if ($(this).hasClass('start')) {
-                //開始工作後disable登出button
-                $("#logout-btn").attr("disabled", true);
-                //隱藏確認工作功能按鈕，開啟工作中按鈕
-                $(".confirm-work-container").css("display", "none");
-                $(".work-action-container").css("display", "block");
-                $(".topbar-status h2").text("工作進行");    //表示已經進入工作頁面，不得返回
-                //1.insert DB to work_log
-                $.ajax({
+        // 重複的 part 拉出來寫，手動輸入點選確認 + 前一頁派工單選完直接進入此 action
+        function frozenInputAndReadyToWork(){
+            document.getElementById('keyinId').disabled = true;
+            document.getElementById('expectCnt').disabled = true;
+            $('#confirm-task-btn').text('開始工作');
+            $('#confirm-task-btn').addClass('start');
+        }
 
-                });
-
-                //2.進入新的頁面
-
-                
+        // work log 資料準備，分成手動輸入以及選取派工單兩種方式
+        function recordWorkLog(detail, state, eDoneCnt){
+            var worker, machine = null, material, process, cnt, state, dpUuid = null;
+            if (detail != null){
+                if(detail.assignWorker == null){
+                    worker = thisWorker;
+                } else {
+                    worker = detail.assignWorker;
+                }
+                if(detail.assignMachine == null){
+                    machine = thisMachine
+                } else {
+                    machine = detail.assignMachine;
+                }
+                material = detail.materialId;
+                process = detail.processStep;
+                // cnt = detail.totalCnt;
+                cnt = $('#expectCnt').val();
+                dpUuid = detail.uuid;
             } else {
-                document.getElementById("keyinId").disabled = true;
-                document.getElementById("expectCnt").disabled = true;
-                $(this).text("開始工作");
-                $(this).addClass("start");
+                // var workerInfo = $('#top-worker-info').text().split('/');
+                // worker =  workerInfo[1];
+                worker = thisWorker;
+                process = thisProcess;
+                machine = thisMachine;
+                material = $('#keyinId').val();
+                // process =  workerInfo[0];
+                cnt = $('#expectCnt').val();
+                // if (workerInfo.length == 3){
+                //     machine = workerInfo[2];
+                // }
+            }
+            //異常回報，完成數量需另外輸入
+            if(state == 6){
+                cnt = eDoneCnt;
+            }
+            insertWorkLog(worker, machine, material, process, cnt, state, dpUuid);
+        }
+
+        // insert work log 實際動作，透過 jQuery ajax 後端 API
+        function insertWorkLog(workerId, machineId, materialId, processStep, materialCnt, state, dpUuid){
+            $.ajax({
+                url: "/working/insertWorkLog",
+                type: "POST",
+                async: false,
+                data: {
+                    "workerId": workerId,
+                    "machineId": machineId,
+                    "materialId": materialId,
+                    "processStep": processStep,
+                    "materialCnt": materialCnt,
+                    "state": state,
+                    "dispatchUUID": dpUuid
+                },
+                dataType: 'json',
+                beforeSend: function() {
+                //請求前的處理
+                },
+                success: function(response){
+                //請求成功的處理
+                    // return new Promise(function(resolve, reject){
+                    //     resolve(response.retStatus);
+                    // });
+                },
+                complete: function() {
+                //請求完成的處理
+                },
+                error: function() {
+                //請求出錯處理
+                }
+            });
+        }
+
+        // 回覆報工資訊，透過 jQuery ajax 後端 API
+        function reportWorkStats(dispatchUUID, workerId, machineId, materialId, processStep){
+            $.ajax({
+                url: "/working/reportWorkStats",
+                type: "POST",
+                async: false,
+                data: {
+                    "workerId": workerId,
+                    "machineId": machineId,
+                    "materialId": materialId,
+                    "processStep": processStep,
+                    "dispatchUUID": dispatchUUID
+                },
+                dataType: 'json',
+                beforeSend: function() {
+                //請求前的處理
+                },
+                success: function(response){
+                //請求成功的處理
+                },
+                complete: function() {
+                //請求完成的處理
+                },
+                error: function() {
+                //請求出錯處理
+                }
+            });
+        }
+
+        // 更改派工單狀態，透過 jQuery ajax 後端 API
+        function updateDispatchStatus(dispatchUUID, status){
+            $.ajax({
+                url: "/working/updateDispatchStatus",
+                type: "POST",
+                async: false,
+                data: {
+                    "dispatchUUID": dispatchUUID,
+                    "status": status
+                },
+                dataType: 'json',
+                beforeSend: function() {
+                //請求前的處理
+                },
+                success: function(response){
+                //請求成功的處理
+                },
+                complete: function() {
+                //請求完成的處理
+                },
+                error: function() {
+                //請求出錯處理
+                }
+            });
+        }
+
+        function switchToFinishPage(){
+            var urlParts = location.href.toString().split("/");
+            var target = location.href.toString().replace(urlParts[urlParts.length-2],"working").replace(urlParts[urlParts.length-1], "jobFinish");
+            window.location.href = target;
+        }
+
+        var dispatchUUID = null;
+        var dispatchDetail = null;
+        var thisWorker;
+        var thisProcess;
+        var thisMachine;
+
+        $(document).ready(function() {
+            //先擷取參數
+            var workerInfo = $('#top-worker-info').text().split('/');
+            thisProcess = workerInfo[0];
+            thisWorker = workerInfo[1];
+            if (workerInfo.length == 3){
+                thisMachine = workerInfo[2];
+            } else{
+                thisMachine = null;
+            }
+
+            // 藉由 dispatch order 的 uuid 從 db 取出資訊
+            var currentUrl = location.href;
+            if(currentUrl.includes("UUID")){
+                dispatchUUID = currentUrl.split('=')[1];
+                $.ajax({
+                    url: "/task/findDispatchDetail",
+                    type: "POST",
+                    async: true,
+                    data: {"dispatchUUID" : dispatchUUID},
+                    dataType: 'json',
+                    beforeSend: function() {
+				    //請求前的處理
+				    },
+                    success: function(response){
+                        $('#keyinId').val(response.materialId);
+                        if(response.finishCnt == null){
+                            $('#expectCnt').val(response.totalCnt);
+                        }
+                        else{
+                            $('#expectCnt').val(response.totalCnt - response.finishCnt);
+                        }
+                        //將回值存回變數dispatchDetail
+                        dispatchDetail = response;
+                    },
+                    complete: function() {
+				    //請求完成的處理
+				    },
+				    error: function() {
+				    //請求出錯處理
+				    }
+                });
+                frozenInputAndReadyToWork();
             }
         });
 
-        
+        //確定工作 + 開始工作
+        $('#confirm-task-btn').on('click', function(){
+            if ($(this).hasClass('start')) {
+                //開始工作後disable登出button
+                $('#logout-btn').attr('disabled', true);
+                //隱藏確認工作功能按鈕，開啟工作中按鈕
+                $('.confirm-work-container').css('display', 'none');
+                $('.work-action-container').css('display', 'block');
+                //表示已經進入工作頁面，中途不得登出
+                $('.topbar-status h2').text('工作進行');    
+                //寫worklog and state = 1 (START)
+                recordWorkLog(dispatchDetail, 1, 0);
+                if(dispatchUUID != null){
+                    updateDispatchStatus(dispatchUUID, "In Process");
+                }
+            } else {
+                frozenInputAndReadyToWork();
+            }
+        });
+
+        // 暫停工作
+        $('#pause-work-btn').on('click', function(){
+            if ($(this).hasClass('pause')){
+                // 從工作暫停狀態恢復工作
+                $('#finish-work-btn').attr('disabled', false); 
+                $(this).removeClass('pause'); 
+                $(this).text('暫停工作');
+                $('.topbar-status h2').text('工作進行');
+                //寫worklog and state = 5 (RESUME)
+                recordWorkLog(dispatchDetail, 5, 0);
+            } else if ($(this).hasClass('exception')) {
+                // 從工作異常狀態恢復工作
+                $(this).removeClass('exception');
+                $(this).text('暫停工作');
+                $('#error-occur-btn').attr('disabled', false);
+                $('#error-occur-btn').removeClass('exception');
+                $('#finish-work-btn').removeClass('exception');
+                $('#finish-work-btn').text('完成工作');
+                $('.topbar-status h2').text('工作進行');
+                //寫worklog and state = 5 (RESUME)
+                recordWorkLog(dispatchDetail, 5, 0);
+            } else {
+                //暫停工作 action
+                $('#finish-work-btn').attr('disabled', true);
+                $(this).addClass('pause');
+                $(this).text('繼續工作');
+                $('.topbar-status h2').text('工作暫停');
+                //寫worklog and state = 2 (PAUSE)
+                recordWorkLog(dispatchDetail, 2, 0);
+            }
+        });
+
+        // 發生異常
+        $('#error-occur-btn').on('click', function(){
+            //發生異常 action
+            $(this).attr('disabled', true);
+            $(this).addClass('exception');
+            $('#pause-work-btn').addClass('exception');
+            $('#pause-work-btn').text('繼續工作');            
+            $('#finish-work-btn').addClass('exception');
+            $('#finish-work-btn').text('回報工作');
+            if ($('#pause-work-btn').hasClass('pause')) {
+                $('#finish-work-btn').attr('disabled', false); 
+                $('#pause-work-btn').removeClass('pause');
+            }
+            $('.topbar-status h2').text('工作異常');
+            //寫worklog and state = 3 (EXCEPTION)
+            recordWorkLog(dispatchDetail, 3, 0);
+        });
+
+        // 完成工作 + 回報工作
+        $('#finish-work-btn').on('click', function(){
+            var taskInfo = "工件料號: " + $('#keyinId').val() + " / 預計完成數:" + $('#expectCnt').val();
+            //工作異常狀態下回報完成，需要輸入目前完成幾個
+            if($(this).hasClass('exception')){
+                Swal.fire({
+                    title: "回報確認",
+                    html: "<p>" + taskInfo + "</p>", 
+                    input: 'text',
+                    inputPlaceholder: "輸入完成數量",
+                    showCancelButton: true,
+                    cancelButtonText: "取消",
+                    confirmButtonText: "確定",                    
+                }).then((result) => {
+                    if (result.value) {
+                        //寫worklog and state = 5 (EXCEPTION_REPORT)
+                        recordWorkLog(dispatchDetail, 6, result.value);
+                        //寫reportLog & update dispatch order status
+                        reportWorkStats(dispatchUUID, thisWorker, thisMachine, $('#keyinId').val(), thisProcess);
+                        //跳到完成頁面
+                        switchToFinishPage(thisWorker);
+                    }
+                });
+            } else {
+                //正常狀態下回報完成，直接抓預計完成數量
+                var reportInfo = "實際完成數量: " + $('#expectCnt').val();
+                Swal.fire({
+                    title: "回報確認",
+                    html: "<p>" + taskInfo + "</p></br><p style=\"color: blue;\">" + reportInfo + "</p>", 
+                    showCancelButton: true,
+                    cancelButtonText: "取消",
+                    confirmButtonText: "確定"
+                }).then((result) => {
+                    if (result.value) {
+                        //寫worklog and state = 4 (NORMAL_REPORT)
+                        recordWorkLog(dispatchDetail, 4, 0);
+                        //寫reportLog & update dispatch order status
+                        reportWorkStats(dispatchUUID, thisWorker, thisMachine, $('#keyinId').val(), thisProcess);
+                        //跳到完成頁面
+                        switchToFinishPage(thisWorker);
+                    }
+                });
+            }
+        });
 
     </script>
 

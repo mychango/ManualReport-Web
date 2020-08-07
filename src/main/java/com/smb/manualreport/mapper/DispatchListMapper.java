@@ -5,6 +5,7 @@ import com.smb.manualreport.bean.SrcDispatchOrder;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import java.util.List;
 
@@ -24,4 +25,20 @@ public interface DispatchListMapper {
             + "and status not in ('Finish', 'In Process') "
             + "</script>")
     List<OpDispatchOrder> findOpDispatchOrderByStepAndWorkerOrMachine(@Param("processStep") String processStep, @Param("workerId") String workerId, @Param("machineId") String machineId);
+
+    @Select("select * from smb_op.dispatch_list where uuid = #{uuid}")
+    OpDispatchOrder findOpDispatchOrderByUUID(@Param("uuid") String uuid);
+
+    @Update("<script>"
+            + "update smb_op.dispatch_list set status = #{opDispatchOrder.status}, "
+            + "finish_cnt = #{opDispatchOrder.finishCnt}, "
+            + "<if test='opDispatchOrder.actualFinishDt != null'> actual_finish_dt = #{opDispatchOrder.actualFinishDt}, </if>"
+            + "last_report_dt = current_timestamp() "
+            + "where uuid = #{uuid}"
+            + "</script>")
+    int updateDispatchStatusAndCountByUUID(@Param("uuid") String uuid, @Param("opDispatchOrder") OpDispatchOrder opDispatchOrder);
+
+    @Update("update smb_op.dispatch_list set status = #{status}, last_report_dt = current_timestamp() where uuid = #{uuid}")
+    int updateDispatchStatusByUUID(@Param("uuid") String uuid, @Param("status") String status);
+
 }

@@ -41,28 +41,16 @@ public class LoginController {
 
     @RequestMapping("/index")
     public String indexMapping(HttpServletRequest request, Model model){
+        logger.info(">>> Login successful, start to redirect");
         Optional<Object> userArea = Optional.ofNullable(request.getSession().getAttribute("area"));
         String processStep = null;
         if (userArea.isPresent()){
             processStep = userArea.get().toString();
         }
 
-        //基本上不會有null的狀況
-//        String selectWorker = request.getSession().getAttribute("nickName").toString();
-
         if(processStep != null && processStep.equals("WELD")){
-//            logger.info("Weld workers directly enter dispatch order select page!");
-//            String selectMachine = null;
-//            List<OpDispatchOrder> listOpDispatchOrder = dispatchInfoService.findOpDispatchOrderByStepAndWorkerOrMachine(processStep, selectWorker, null);
-//            logger.info("Get wait/error dispatch order for worker/machine:" + listOpDispatchOrder.size());
-//            model.addAttribute("listOpDispatchOrder", listOpDispatchOrder);
-//            return "dispatchOrderSelect2";
             return "redirect:/task/dpOrderSelect";
         } else {
-//            logger.info("Other area have to select machine before start to work!");
-//            List<MachineInfo> listMachineInfo = machineInfoService.findMachineByProcessStep(processStep);
-//            model.addAttribute("listMachineInfo", listMachineInfo);
-//            return "machineSelect";
             return "redirect:/task/machineSelect";
         }
     }

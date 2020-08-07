@@ -1,6 +1,7 @@
 package com.smb.manualreport.bean;
 
 import java.io.Serializable;
+import java.util.Date;
 
 public class WorkLog implements Serializable {
     private String workerId;
@@ -9,6 +10,34 @@ public class WorkLog implements Serializable {
     private String processStep;
     private Integer materialCnt;
     private Integer state;
+    private String createDt;
+    private String dispatchUuid;
+
+    public WorkLog(String workerId, String machineId, String materialId, String processStep, int materialCnt, int state, String dispatchUuid){
+        this.workerId = workerId;
+        this.machineId = machineId;
+        this.materialId = materialId;
+        this.processStep = processStep;
+        this.materialCnt = materialCnt;
+        this.state = state;
+        this.dispatchUuid = dispatchUuid;
+    }
+
+    public String getDispatchUuid() {
+        return dispatchUuid;
+    }
+
+    public void setDispatchUuid(String dispatchUuid) {
+        this.dispatchUuid = dispatchUuid;
+    }
+
+    public String getCreateDt() {
+        return createDt;
+    }
+
+    public void setCreateDt(String createDt) {
+        this.createDt = createDt;
+    }
 
     public String getWorkerId() {
         return workerId;

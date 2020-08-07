@@ -3,6 +3,7 @@ package com.smb.manualreport.bean;
 import java.io.Serializable;
 
 public class OpDispatchOrder implements Serializable {
+    private String uuid;
     private String mfgorderId;
     private String dispatchId;
     private String materialId;
@@ -15,6 +16,14 @@ public class OpDispatchOrder implements Serializable {
     private String assignMachine;
     private Integer finishCnt;
     private String actualFinishDt;
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
 
     public String getMfgorderId() {
         return mfgorderId;

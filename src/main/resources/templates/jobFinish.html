@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="tw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>報工系統</title>
+</head>
+<body>
+    <div class="topbar-container">
+        <div class="topbar-identity">
+            <p id="top-worker-info" th:if="${session.machineId} == null" th:text="${session.area} + '/' + ${session.nickName}"></p>
+            <p id="top-worker-info" th:if="${session.machineId} != null" th:text="${session.area} + '/' + ${session.nickName} + '/' + ${session.machineId}"></p>
+        </div>
+        <div class="topbar-status">
+            <h2>工作完成</h2>
+        </div>
+        <form th:action="@{/logout}" method="POST" id="logout-form">
+            <div class="topbar-function">
+                <button class="top-btn" id="logout-btn">登出</button>
+            </div>
+        </form>
+    </div>
+    <div class="mainframe-container">
+        <div class="complete-info-container">
+            <p th:text="'工件料號: ' + ${materialId}"></p>
+            <p th:text="'總計完成數量: ' + ${materialCnt}"></p>
+            <p>您已經完成工作回報</p>
+        </div>
+        <div class=bottom-button-container>
+            <div>
+                <button class="op-btn" id="other-task-btn">其他工作</button>
+            </div>
+        </div>
+    </div>
+    <script th:src="@{/assets/plugins/jquery/jquery.js}" type="text/javascript"></script>
+    <script>
+        $('#other-task-btn').on('click', function(){
+            var urlParts = location.href.toString().split("/");
+            var target = location.href.toString().replace(urlParts[urlParts.length-2],"task").replace(urlParts[urlParts.length-1], "dpOrderSelectOther");
+            window.location.href = target;
+            // console.log("準備跳頁囉");
+        });
+    </script>
+</body>
+</html>
