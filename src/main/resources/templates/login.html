@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>報工系統</title>
-<!--    <link rel="stylesheet" href="assets/plugins/fontawesome-free/css/all.css">-->
 </head>
 <body>
     <div class="top-bar-container">
@@ -28,31 +27,5 @@
     <div th:if="${param.error}">
         <span>Invalid account or password</span>
     </div>
-<!--    <script>-->
-<!--        var handleSignInFormSubmit = function() {-->
-<!--            $('#manual-report-login-submit').click(function(e) {-->
-<!--                e.preventDefault();-->
-<!--                var btn = $(this);-->
-<!--                var form = $(this).closest('form');-->
-
-<!--                form.validate({-->
-<!--                    rules: {-->
-<!--                        email: {-->
-<!--                            required: false,-->
-<!--                            email: false-->
-<!--                        },-->
-<!--                        password: {-->
-<!--                            required: false-->
-<!--                        }-->
-<!--                    }-->
-<!--                });-->
-
-<!--                if (!form.valid()) {-->
-<!--                    return;-->
-<!--                }-->
-<!--                btn.attr('disabled', true);-->
-<!--            });-->
-<!--        }-->
-<!--    </script>-->
 </body>
 </html>

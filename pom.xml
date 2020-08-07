@@ -91,6 +91,13 @@
             <version>2.0.9.RELEASE</version>
         </dependency>
 
+<!-- for parsing json format -->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>1.2.7</version>
+        </dependency>
+
     </dependencies>
 
 </project>

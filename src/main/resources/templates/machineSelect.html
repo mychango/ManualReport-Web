@@ -8,7 +8,7 @@
 <body>
     <div class="topbar-container">
         <div class="topbar-identity">
-            <p th:text="'(' + ${session.area} + ')' + ${session.nickName}"></p>
+            <p th:text="${session.area} + '/' + ${session.nickName}"></p>
         </div>
         <div class="topbar-status">
             <h2>工作準備(選擇機台)</h2>
@@ -31,8 +31,10 @@
             <div>
                 <input type="hidden" th:name="selectWorker" th:value="${session.nickName}">
             </div>
-            <div class="machine-confirm-container">
-                <button class="confirm-button">確認設備</button>
+            <div class="bottom-button-container">
+                <div>
+                    <button class="op-btn">確認設備</button>
+                </div>
             </div>
         </form>
     </div>

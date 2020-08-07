@@ -23,7 +23,7 @@ public class SyncController {
     @RequestMapping("/tool/syncOrderTest")
     @ResponseBody
     public ResponseEntity<String> syncDispatchOrder(){
-        logger.info("Start to sync dispatch order from smbsource.");
+        logger.info(">>> Start to sync dispatch order from smbsource.");
         for(String s : Constant.JUJIANG_PROCESS_STEP){
             dispatchInfoService.SyncDispatchOrderFromSourceToOP(s);
         }
