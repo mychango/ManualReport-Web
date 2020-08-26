@@ -45,6 +45,8 @@ public class MRSWebSecurityConfig extends WebSecurityConfigurerAdapter {
         http.cors().and().csrf().disable();
         http.authorizeRequests()
                 .antMatchers("/login").permitAll()
+                .antMatchers("/util/changeSessionLanguage").permitAll()
+                .antMatchers("/working/configtest").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .authenticationProvider(mrsAuthenticationProvider)

@@ -13,15 +13,16 @@ public class WorkLog implements Serializable {
     private String createDt;
     private String dispatchUuid;
 
-    public WorkLog(String workerId, String machineId, String materialId, String processStep, int materialCnt, int state, String dispatchUuid){
-        this.workerId = workerId;
-        this.machineId = machineId;
-        this.materialId = materialId;
-        this.processStep = processStep;
-        this.materialCnt = materialCnt;
-        this.state = state;
-        this.dispatchUuid = dispatchUuid;
-    }
+//    public WorkLog(String workerId, String machineId, String materialId, String processStep, int materialCnt, int state, String createDt, String dispatchUuid){
+//        this.workerId = workerId;
+//        this.machineId = machineId;
+//        this.materialId = materialId;
+//        this.processStep = processStep;
+//        this.materialCnt = materialCnt;
+//        this.state = state;
+//        this.createDt = createDt;
+//        this.dispatchUuid = dispatchUuid;
+//    }
 
     public String getDispatchUuid() {
         return dispatchUuid;

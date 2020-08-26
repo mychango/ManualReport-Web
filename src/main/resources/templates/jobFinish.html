@@ -5,30 +5,166 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>報工系統</title>
 </head>
+<style>
+    html, body, div, span, applet, object, iframe,
+    h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+    a, abbr, acronym, address, big, cite, code,
+    del, dfn, em, img, ins, kbd, q, s, samp,
+    small, strike, strong, sub, sup, tt, var,
+    b, u, i, center,
+    dl, dt, dd, ol, ul, li,
+    fieldset, form, label, legend,
+    table, caption, tbody, tfoot, thead, tr, th, td,
+    article, aside, canvas, details, embed, 
+    figure, figcaption, footer, header, hgroup, 
+    menu, nav, output, ruby, section, summary,
+    time, mark, audio, video {
+        margin: 0;
+        padding: 0;
+        border: 0;
+        font-size: 100%;
+        font: inherit;
+        vertical-align: baseline;
+    }
+    article, aside, details, figcaption, figure, 
+    footer, header, hgroup, menu, nav, section {
+        display: block;
+    }
+    body {
+        background-color: #EBEBEB;
+        /* width: 100%; */
+        background-size: cover;
+    }
+    ol, ul {
+        list-style: none;
+    }
+    blockquote, q {
+        quotes: none;
+    }
+    blockquote:before, blockquote:after,
+    q:before, q:after {
+        content: '';
+        content: none;
+    }
+    table {
+        border-collapse: collapse;
+        border-spacing: 0;
+    }
+    body {
+        font-family: Microsoft JhengHei;
+    }
+
+    .top-bar-container {
+        background-color: #1C1F4C;
+        width: 100%;
+        height: 50px;
+        color: #ffffff;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .top-bar-container .top-bar-identity {
+        padding-left: 10px;
+        font-size: 20px;
+        line-height: 50px;
+        width: 100px;
+        white-space: nowrap;
+    } 
+
+    .top-bar-container .top-bar-status {
+        font-size: 30px;
+        line-height: 50px;
+        font-weight: bold;
+    }
+
+    .top-bar-container .top-bar-function {
+        padding-right: 10px;
+        /* 垂直置中尚缺好方法 */
+        padding-top: 11px;  
+        height: 100%;
+    }
+
+    .logout-form button {
+        font-family: Microsoft JhengHei;
+        font-size: 20px;
+        border-radius: 4px;
+        border: none;
+        font-weight: bold;
+        outline: none;
+    }
+
+    .complete-info-container{
+        padding-top: 80px;
+        text-align: center;
+    }
+
+    .complete-info-container p {
+        display: block;
+        font-size: 24px;
+    }
+
+    .complete-info-container .info-content {
+        color: blue;
+        font-size: 32px;
+    }
+
+    .complete-info-container .info-memo {
+        padding-top: 36px;
+    }
+
+    .bottom-button-container {
+        display: flex;        
+        justify-content: center;
+    }
+
+    .bottom-button-container {
+        padding-top: 50px;
+    }
+
+    .bottom-button-container button {
+        font-family: Microsoft JhengHei;
+        font-size: 28px;
+        width: 240px;
+        height: 66px;
+        background-color: #1C1F4C;
+        color: #ffffff;
+        border: none;
+        border-radius: 30px;
+        outline:none;
+    }
+
+    .bottom-button-container button:hover {
+        background-color: rgba(28, 31, 76, 0.8);
+    }
+
+    .bottom-button-container button:active {
+        background-color: rgba(28, 31, 76, 0.6);
+    }
+</style>
 <body>
-    <div class="topbar-container">
-        <div class="topbar-identity">
+    <div class="top-bar-container">
+        <div class="top-bar-identity">
             <p id="top-worker-info" th:if="${session.machineId} == null" th:text="${session.area} + '/' + ${session.nickName}"></p>
             <p id="top-worker-info" th:if="${session.machineId} != null" th:text="${session.area} + '/' + ${session.nickName} + '/' + ${session.machineId}"></p>
         </div>
-        <div class="topbar-status">
-            <h2>工作完成</h2>
+        <div class="top-bar-status">
+            <h2 th:text="#{taskFinish}"></h2>
         </div>
-        <form th:action="@{/logout}" method="POST" id="logout-form">
-            <div class="topbar-function">
-                <button class="top-btn" id="logout-btn">登出</button>
+        <form th:action="@{/logout}" method="POST" class="logout-form">
+            <div class="top-bar-function">
+                <button class="top-btn" id="logout-btn" th:text="#{logout}"></button>
             </div>
         </form>
     </div>
     <div class="mainframe-container">
         <div class="complete-info-container">
-            <p th:text="'工件料號: ' + ${materialId}"></p>
-            <p th:text="'總計完成數量: ' + ${materialCnt}"></p>
-            <p>您已經完成工作回報</p>
+            <p class="info-content" th:text="#{materialNumber} + ': ' + ${materialId}"></p>
+            <p class="info-content" th:text="#{totalFinishCnt} + ': ' + ${materialCnt}"></p>
+            <p class="info-memo" th:text="#{completeShowText}"></p>
         </div>
         <div class=bottom-button-container>
             <div>
-                <button class="op-btn" id="other-task-btn">其他工作</button>
+                <button class="op-btn" id="other-task-btn" th:text="#{otherTask}"></button>
             </div>
         </div>
     </div>
