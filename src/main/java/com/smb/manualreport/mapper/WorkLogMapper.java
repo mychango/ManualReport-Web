@@ -16,7 +16,7 @@ public interface WorkLogMapper {
     int insertWorkLog(@Param("workLog") WorkLog workLog);
 
     @Select("<script>"
-            + "select worker_id, material_id, machine_id, process_step, material_cnt, state, DATE_FORMAT(create_dt, \"%Y-%m-%d %T\") as create_dt from smb_op.work_log where 1 = 1 "
+            + "select worker_id, material_id, machine_id, process_step, material_cnt, state, DATE_FORMAT(create_dt, \"%Y-%m-%d %T\") as create_dt, dispatch_uuid from smb_op.work_log where 1 = 1 "
             + "<if test='machineId != null'> and machine_id = #{machineId} </if>"
             + "and worker_id = #{workerId} "
             + "and material_id = #{materialId} "
@@ -24,6 +24,6 @@ public interface WorkLogMapper {
             + "</script>")
     List<WorkLog> findWorkLogByWorkerAndMachineAndMaterial(@Param("workerId") String workerId, @Param("machineId") String machineId, @Param("materialId") String materialId);
 
-    @Select("select worker_id, material_id, machine_id, process_step, material_cnt, state, DATE_FORMAT(create_dt, \"%Y-%m-%d %T\") as create_dt from smb_op.work_log where worker_id = #{workerId} order by create_dt desc")
+    @Select("select worker_id, material_id, machine_id, process_step, material_cnt, state, DATE_FORMAT(create_dt, \"%Y-%m-%d %T\") as create_dt, dispatch_uuid from smb_op.work_log where worker_id = #{workerId} order by create_dt desc")
     List<WorkLog> findWorkLogByWorker(@Param("workerId") String workerId);
 }

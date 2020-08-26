@@ -2,10 +2,14 @@ package com.smb.manualreport.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.smb.manualreport.bean.ApiReturn;
+import com.smb.manualreport.bean.ElementLog;
 import com.smb.manualreport.bean.OpDispatchOrder;
 import com.smb.manualreport.bean.WorkLog;
+import com.smb.manualreport.config.ApiConfig;
+import com.smb.manualreport.config.ReportConfig;
 import com.smb.manualreport.service.DispatchInfoService;
 import com.smb.manualreport.service.WorkRecordService;
+import com.smb.manualreport.utililty.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +34,66 @@ public class WorkTrackController {
 
     @Autowired
     private DispatchInfoService dispatchInfoService;
+
+    @Autowired
+    private ReportConfig reportConfig;
+
+    @RequestMapping(value = "configtest")
+    @ResponseBody
+    public ResponseEntity<String> configtest(){
+        logger.info(reportConfig.getControl().toString());
+        logger.info(reportConfig.getRecipient());
+        return new ResponseEntity<String>("OK",HttpStatus.OK);
+    }
+
+//    測試用Function
+//    @Autowired
+//    private ApiConfig apiConfig;
+//
+//    @RequestMapping(value = "configtest")
+//    @ResponseBody
+//    public ResponseEntity<String> configtest(){
+//        logger.info(apiConfig.getUrl());
+//        logger.info(String.valueOf(apiConfig.getPort()));
+//        String apiUrl = apiConfig.getUrl() + ":" + apiConfig.getPort() + "/";
+//        logger.info(apiUrl);
+//        ElementLog el = new ElementLog();
+//        el.setWorker_code("mychango");
+//        el.setMachine_code("GuitarCreator-1");
+//        el.setElement_code("Furch-23");
+//        el.setFinish_number(2);
+//        el.setStart_datetime("2020-08-14 15:58:58");
+//        el.setFinish_datetime("2020-08-14 16:40:20");
+//        String simulateStep = "LASR";
+//        switch(simulateStep){
+//            case "LASR":
+//                el.setStep_code("MB");
+//                break;
+//            case "BEND":
+//                el.setStep_code("MC");
+//                break;
+//            case "WELD":
+//                el.setStep_code("MD");
+//                break;
+//            default:
+//                //do nothing
+//        }
+//        el.setFaile_number(1);
+//        logger.info(JSON.toJSONString(el));
+//        Util.reportToSmartboss(JSON.toJSONString(el), apiUrl);
+//        return new ResponseEntity<String>("OK",HttpStatus.OK);
+//    }
+
+    @RequestMapping(value = "/getCurrentWorkState")
+    @ResponseBody
+    public ResponseEntity<String> getCurrentWorkState(HttpServletRequest request, Model model){
+        logger.info(">>> Start to get current work status");
+
+        String workerId = request.getSession().getAttribute("nickName").toString();
+        WorkLog wl = workRecordService.findWorkLogByWorker(workerId);
+
+        return new ResponseEntity<String>(JSON.toJSONString(wl), HttpStatus.OK);
+    }
 
     @RequestMapping(value = "/insertWorkLog", method = RequestMethod.POST)
     @ResponseBody
@@ -76,7 +140,7 @@ public class WorkTrackController {
 
         ApiReturn ar = new ApiReturn();
         try {
-            workRecordService.insertRecordLog(dispatchUUID, workerId, machineId, materialId, processStep);
+            workRecordService.insertRecordLog(dispatchUUID, workerId, machineId, materialId, processStep, reportConfig.getControl(), reportConfig.getRecipient());
             dispatchInfoService.updateDispatchOrderByReportStats(dispatchUUID, workerId, machineId, materialId, processStep);
             ar.setRetMessage("");
             ar.setRetStatus("Success");
@@ -92,7 +156,7 @@ public class WorkTrackController {
     public String jobFinish(HttpServletRequest request, Model model){
         String workerId = request.getSession().getAttribute("nickName").toString();
         WorkLog wl = workRecordService.findWorkLogByWorker(workerId);
-        model.addAttribute("materialId", wl.getMachineId());
+        model.addAttribute("materialId", wl.getMaterialId());
         model.addAttribute("materialCnt", wl.getMaterialCnt());
         return "jobFinish";
     }

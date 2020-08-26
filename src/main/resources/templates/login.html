@@ -5,27 +5,212 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>報工系統</title>
 </head>
+<style>
+    html, body, div, span, applet, object, iframe,
+    h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+    a, abbr, acronym, address, big, cite, code,
+    del, dfn, em, img, ins, kbd, q, s, samp,
+    small, strike, strong, sub, sup, tt, var,
+    b, u, i, center,
+    dl, dt, dd, ol, ul, li,
+    fieldset, form, label, legend,
+    table, caption, tbody, tfoot, thead, tr, th, td,
+    article, aside, canvas, details, embed, 
+    figure, figcaption, footer, header, hgroup, 
+    menu, nav, output, ruby, section, summary,
+    time, mark, audio, video {
+        margin: 0;
+        padding: 0;
+        border: 0;
+        font-size: 100%;
+        font: inherit;
+        vertical-align: baseline;
+    }
+    article, aside, details, figcaption, figure, 
+    footer, header, hgroup, menu, nav, section {
+        display: block;
+    }
+    body {
+        background-color: #EBEBEB;
+        /* width: 100%; */
+        background-size: cover;
+    }
+    ol, ul {
+        list-style: none;
+    }
+    blockquote, q {
+        quotes: none;
+    }
+    blockquote:before, blockquote:after,
+    q:before, q:after {
+        content: '';
+        content: none;
+    }
+    table {
+        border-collapse: collapse;
+        border-spacing: 0;
+    }
+    body {
+        font-family: Microsoft JhengHei;
+    }
+
+    .top-bar-container {
+        background-color: #1C1F4C;
+        width: 100%;
+        height: 50px;
+        color: #ffffff;
+    }
+
+    /* .mainframe-container {
+        background-color: #EBEBEB;
+        width: 100%;
+        background-size: cover;
+    } */
+
+    .top-bar-container .top-bar-title {
+        font-size: 30px;
+        font-weight: bold;
+        text-align: center;
+        line-height: 50px;
+    }
+
+    .login-title-container {
+        font-size: 48px;
+        font-weight: bold;
+        padding-top: 80px;
+        padding-bottom: 30px;
+    }
+
+    .language-select-container {
+        display: flex;
+        justify-content: center;
+    }
+
+    .language-select-container button{
+        font-family: Microsoft JhengHei;
+        font-size: 16px;
+        background-color: #1C1F4C;
+        color: #ffffff;
+        border: none;
+        border-radius: 15px;
+        outline:none;
+        width: 100px;
+        height: 30px;
+        margin: 0 10px;
+    }
+
+    .language-select-container button:hover {
+        background-color: rgba(28, 31, 76, 0.8);
+    }
+
+    .language-select-container button:active {
+        background-color: rgba(28, 31, 76, 0.6);
+    }
+
+    .login-title {
+        text-align: center;
+        line-height: 60px;
+        padding-bottom: 10px;
+    }
+
+    .login-form {
+        display: block;
+        margin: 0 auto;
+    }
+
+    .login-form .input-group {
+        padding-top: 20px;
+    }
+
+    .login-form input {
+        border: 2px solid #f6f6f6;
+        border-radius: 6px;
+        width: 300px;
+        padding: 10px 6px;
+        font-family: Microsoft JhengHei;
+        font-size: 20px;
+        margin: 0 auto;   
+        outline:none;
+        /* transition: width 0.4s ease-in-out; */
+        
+    }
+
+    .login-form input:focus {
+        /* border: 2px solid #555555; */
+        /* border-radius: 6px; */
+        /* width: 300px; */
+        background-color: lightblue;
+        
+    }
+
+    .login-form .login-action {
+        padding-top: 30px;
+    }
+
+    .login-form button {
+        font-family: Microsoft JhengHei;
+        font-size: 28px;
+        width: 240px;
+        height: 66px;
+        background-color: #1C1F4C;
+        color: #ffffff;
+        border: none;
+        border-radius: 30px;
+        outline:none;
+        
+    }
+
+    .login-form button:hover {
+        background-color: rgba(28, 31, 76, 0.8);
+    }
+
+    .login-form button:active {
+        background-color: rgba(28, 31, 76, 0.6);
+    }
+
+    .error-msg {
+        padding-top: 10px;
+        text-align: center;
+        color: red;
+        font-size: 20px;
+    }
+    
+
+</style>
 <body>
     <div class="top-bar-container">
-        <h3 class="top-bar-title" style='font-size:20px;'>登入頁面</h3>
+        <h3 class="top-bar-title" th:text="#{homePage}"></h3>
     </div>
-    <div class="login-title-container">
-        <h3 class="login-title" style='font-size:20px;'>報工系統</h3>
-        <h4 class="login-title" style='font-size:20px;'>Manual Report System</h4>
-    </div>
-    <form th:action="@{/login}" method="POST">
-        <div class="input-group">
-            <input class="login-form" type="text" placeholder="帳號" name="username" autocomplete="off">
+    <div class="mainframe-container">
+        <div class="login-title-container">
+            <h3 class="login-title" th:text="#{system}"></h3>
+            <div class="language-select-container">
+                <form th:action="@{/util/changeSessionLanguage}" method="POST">
+                    <input name="lang" type="hidden" value="zh_tw"  />
+                    <button>中文</button>
+                </form>
+                <form th:action="@{/util/changeSessionLanguage}" method="POST">
+                    <input name="lang" type="hidden" value="en_us" />
+                    <button>ENGLISH</button>
+                </form>
+            </div>
         </div>
-        <div class="input-group">
-            <input class="login-form" type="password" placeholder="密碼" name="password">
+        <form class="login-form" th:action="@{/login}" method="POST">
+            <div class="input-group">
+                <!-- <input class="login-form" type="text" placeholder="帳號" name="username" autocomplete="off"> -->
+                <input class="login-form" type="text" th:placeholder="#{account}" name="username" autocomplete="off">
+            </div>
+            <div class="input-group">
+                <!-- <input class="login-form" type="password" placeholder="密碼" name="password"> -->
+                <input class="login-form" type="password" th:placeholder="#{password}" name="password">
+            </div>
+            <div class="login-action">
+                <button id="login-btn" class="op-btn login-form" th:text="#{login}"></button>
+            </div>
+        </form>
+        <div class="error-msg" th:if="${param.error}">
+            <span>Invalid account or password</span>
         </div>
-        <div class="login-action">
-            <button id="login-btn" class="op-btn">登入</button>
-        </div>
-    </form>
-    <div th:if="${param.error}">
-        <span>Invalid account or password</span>
     </div>
 </body>
 </html>

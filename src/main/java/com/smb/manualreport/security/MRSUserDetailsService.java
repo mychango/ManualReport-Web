@@ -41,6 +41,7 @@ public class MRSUserDetailsService implements UserDetailsService {
         request.getSession().setAttribute("realName", userInfo.getRealname());
         request.getSession().setAttribute("identity", userInfo.getPrivilege());
         request.getSession().setAttribute("area", userInfo.getProcessArea());
+        request.getSession().removeAttribute("machineId");
 
         /*** Authorities 使用方式參考 ***/
         List<GrantedAuthority> authorities = new ArrayList<>();

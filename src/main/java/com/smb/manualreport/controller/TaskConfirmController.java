@@ -46,21 +46,28 @@ public class TaskConfirmController {
 
     @RequestMapping("/dpOrderSelect")
     public String dpOrderSelect(HttpServletRequest request, Model model, @RequestParam(name="selectMachine", required=false) String selectMachine) {
-        logger.info(">>> List unfinished dispatch order and start to select!");
+
         Optional<Object> userArea = Optional.ofNullable(request.getSession().getAttribute("area"));
         String processStep = null;
         if (userArea.isPresent()){
             processStep = userArea.get().toString();
         }
+        logger.info(">>> Sync dispatch information from smbsource!!");
+        dispatchInfoService.SyncDispatchOrderFromSourceToOP(processStep);
         String selectWorker = request.getSession().getAttribute("nickName").toString();
+
         if (!processStep.equals("WELD")) {
             selectWorker = null;
+            if (selectMachine == null || selectMachine.isEmpty()) {
+                selectMachine = null;
+            } else {
+                request.getSession().setAttribute("machineId", selectMachine);
+            }
         }
-        if (selectMachine ==null || selectMachine.isEmpty()){
-            selectMachine = null;
-        } else {
-            request.getSession().setAttribute("machineId", selectMachine);
+        if (request.getSession().getAttribute("machineId") != null){
+            selectMachine = request.getSession().getAttribute("machineId").toString();
         }
+        logger.info(">>> List unfinished dispatch order and start to select!");
         List<OpDispatchOrder> listOpDispatchOrder = dispatchInfoService.findOpDispatchOrderByStepAndWorkerOrMachine(processStep, selectWorker, selectMachine);
         model.addAttribute("listOpDispatchOrder", listOpDispatchOrder);
         return "dispatchOrderSelect2";
@@ -98,8 +105,6 @@ public class TaskConfirmController {
 
     @RequestMapping("/workStatus")
     public String confirmTask(HttpServletRequest request, Model model){
-        model.addAttribute("materialId", request.getParameter("materialId"));
-        model.addAttribute("totalCnt", request.getParameter("totalCnt"));
         return "workStatus";
     }
 }

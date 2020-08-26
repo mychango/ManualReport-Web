@@ -2,9 +2,11 @@ package com.smb.manualreport.controller;
 
 import com.smb.manualreport.bean.MachineInfo;
 import com.smb.manualreport.bean.OpDispatchOrder;
+import com.smb.manualreport.bean.WorkLog;
 import com.smb.manualreport.service.DispatchInfoService;
 import com.smb.manualreport.service.MachineInfoService;
 import com.smb.manualreport.service.UserInfoService;
+import com.smb.manualreport.service.WorkRecordService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,8 +27,8 @@ public class LoginController {
 
     private static Logger logger = LoggerFactory.getLogger(LoginController.class);
 
-//    @Autowired
-//    private UserInfoService userInfoService;
+    @Autowired
+    private WorkRecordService workRecordService;
 
     @Autowired
     private MachineInfoService machineInfoService;
@@ -48,10 +50,25 @@ public class LoginController {
             processStep = userArea.get().toString();
         }
 
-        if(processStep != null && processStep.equals("WELD")){
-            return "redirect:/task/dpOrderSelect";
+        String workerId = request.getSession().getAttribute("nickName").toString();
+        WorkLog wl = workRecordService.findWorkLogByWorker(workerId);
+
+        if(wl.getState() == 4 || wl.getState() == 3) {
+            if (processStep != null && processStep.equals("WELD")) {
+                return "redirect:/task/dpOrderSelect";
+            } else {
+                return "redirect:/task/machineSelect";
+            }
         } else {
-            return "redirect:/task/machineSelect";
+            logger.info(">>> Resume previous un-reported work");
+            String target = "/task/workStatus";
+            if (wl.getDispatchUuid() != null) {
+                target += "?dispatchUUID=" + wl.getDispatchUuid();
+            }
+            if (wl.getMachineId() != null){
+                request.getSession().setAttribute("machineId", wl.getMachineId());
+            }
+            return "redirect:" + target;
         }
     }
 
