@@ -3,10 +3,12 @@ package com.smb.manualreport.controller;
 import com.smb.manualreport.bean.MachineInfo;
 import com.smb.manualreport.bean.OpDispatchOrder;
 import com.smb.manualreport.bean.WorkLog;
+import com.smb.manualreport.config.CustomConfig;
 import com.smb.manualreport.service.DispatchInfoService;
 import com.smb.manualreport.service.MachineInfoService;
 import com.smb.manualreport.service.UserInfoService;
 import com.smb.manualreport.service.WorkRecordService;
+import com.smb.manualreport.utililty.Constant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,15 +38,33 @@ public class LoginController {
     @Autowired
     private DispatchInfoService dispatchInfoService;
 
+    @Autowired
+    private CustomConfig customConfig;
+
+    @RequestMapping("/")
+    public String onluUrl(HttpServletRequest request, Model model) {
+        return "redirect:/index";
+    }
+
     @RequestMapping("/login")
     public String login(HttpServletRequest request, Model model) {
-        return "login";
+        //分客戶頁面
+        String returnStr;
+        switch(customConfig.getCode()){
+            case "YJX":
+                returnStr = "login3";
+                break;
+            case "PMCI":
+            default:
+                returnStr = "login2";
+        }
+        return returnStr;
     }
 
     @RequestMapping("/index")
     public String indexMapping(HttpServletRequest request, Model model){
         logger.info(">>> Login successful, start to redirect");
-        Optional<Object> userArea = Optional.ofNullable(request.getSession().getAttribute("area"));
+        Optional<Object> userArea = Optional.ofNullable(request.getSession().getAttribute("processCode"));
         String processStep = null;
         if (userArea.isPresent()){
             processStep = userArea.get().toString();
@@ -53,9 +73,10 @@ public class LoginController {
         String workerId = request.getSession().getAttribute("nickName").toString();
         WorkLog wl = workRecordService.findWorkLogByWorker(workerId);
 
-        if(wl.getState() == 4 || wl.getState() == 3) {
+//        logger.info(processStep);
+        if(wl == null || wl.getState() == 4 || wl.getState() == 3) {
             if (processStep != null && processStep.equals("WELD")) {
-                return "redirect:/task/dpOrderSelect";
+                return "redirect:/task/elementSelect";
             } else {
                 return "redirect:/task/machineSelect";
             }
@@ -68,6 +89,8 @@ public class LoginController {
             if (wl.getMachineId() != null){
                 request.getSession().setAttribute("machineId", wl.getMachineId());
             }
+            request.getSession().setAttribute("processCode", wl.getProcessStep());
+            request.getSession().setAttribute("processName", Constant.PROCESS_MAP_LANGUAGE_MAP.get(wl.getProcessStep()));
             return "redirect:" + target;
         }
     }

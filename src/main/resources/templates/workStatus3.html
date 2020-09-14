@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="tw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>報工系統</title>
+    <!-- <link rel="stylesheet" href="../static/assets/plugins/fontawesome-free/css/all.min.css"> -->
+    <link rel="stylesheet" th:href="@{/assets/plugins/fontawesome-free/css/all.min.css}">
+</head>
+<style>
+    html, body, div, span, applet, object, iframe,
+    h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+    a, abbr, acronym, address, big, cite, code,
+    del, dfn, em, img, ins, kbd, q, s, samp,
+    small, strike, strong, sub, sup, tt, var,
+    b, u, i, center,
+    dl, dt, dd, ol, ul, li,
+    fieldset, form, label, legend,
+    table, caption, tbody, tfoot, thead, tr, th, td,
+    article, aside, canvas, details, embed, 
+    figure, figcaption, footer, header, hgroup, 
+    menu, nav, output, ruby, section, summary,
+    time, mark, audio, video {
+        margin: 0;
+        padding: 0;
+        border: 0;
+        font-size: 100%;
+        font: inherit;
+        vertical-align: baseline;
+    }
+    article, aside, details, figcaption, figure, 
+    footer, header, hgroup, menu, nav, section {
+        display: block;
+    }
+    body {
+        background-color: #EBEBEB;
+        /* width: 100%; */
+        background-size: cover;
+    }
+    ol, ul {
+        list-style: none;
+    }
+    blockquote, q {
+        quotes: none;
+    }
+    blockquote:before, blockquote:after,
+    q:before, q:after {
+        content: '';
+        content: none;
+    }
+    table {
+        border-collapse: collapse;
+        border-spacing: 0;
+    }
+    body {
+        font-family: Microsoft JhengHei;
+    }
+
+    ::placeholder {
+        color: #d6d6d6;
+    }
+
+    .top-bar-container {
+        background-color: #1C1F4C;
+        width: 100%;
+        height: 75px;
+        color: #ffffff;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .top-bar-container .top-bar-identity {
+        padding-left: 10px;
+        font-size: 26px;
+        line-height: 75px;
+        width: 100px;
+        white-space: nowrap;
+    } 
+
+    .top-bar-container .top-bar-status {
+        font-size: 40px;
+        line-height: 75px;
+        font-weight: bold;
+    }
+
+    .top-bar-container .logout-form {
+        width: 100px;
+        padding-right: 10px;
+        height: 75px;
+    }
+
+    .logout-form .top-bar-function {
+        height: 75px;
+        display: flex;
+        align-items: center;
+        float: right;
+    }
+
+    .logout-form button {
+        font-family: Microsoft JhengHei;
+        font-size: 26px;
+        border-radius: 30px;
+        border: none;
+        font-weight: bold;
+        outline: none;
+        height: 43px;
+        width: 100px;
+        background-color: #EBEBEB;
+        text-align: center;
+        white-space: nowrap;
+    }
+
+    .task-info-container {
+        padding-top: 80px;
+    }
+
+    .task-info-material {
+        display: flex;
+        padding-top: 24px;
+        justify-content: center;
+    }    
+
+    .task-info-material:last-of-type {
+        padding-bottom: 100px;
+    }
+
+    .task-info-material input {
+        border: 2px solid #f6f6f6;
+        border-radius: 6px;
+        width: 335px;
+        padding: 10px 6px;
+        font-family: Microsoft JhengHei;
+        font-size: 32px;
+        /* margin: 0 auto;    */
+        outline:none;
+        /* transition: width 0.4s ease-in-out; */
+        
+    }
+
+    .task-info-material span {
+        font-size: 32px;
+        line-height: 66px;
+        /* line-height: 50px; */
+        font-weight: bold;
+    }
+
+    .task-info-material input:focus {
+        /* border: 2px solid #555555; */
+        /* border-radius: 6px; */
+        /* width: 300px; */
+        background-color: rgb(255, 242, 242);
+        
+    }
+
+    .task-info-material input:disabled {
+        background-color: rgba(141, 148, 154, 0.6);
+    }
+
+    .bottom-button-container{
+        display: flex;
+        justify-content:center;
+    }
+
+    .bottom-button-container button {
+        font-family: Microsoft JhengHei;
+        font-size: 24px;
+        width: 190px;
+        height: 130px;
+        border-radius: 20px;
+        border: none;
+        background-color: #1C1F4C;
+        color: #ffffff;
+        margin: 0 15px;
+        outline:none;
+    }
+
+    .bottom-button-container button:hover {
+        background-color: rgba(28, 31, 76, 0.8);
+    }
+
+    .bottom-button-container button:active {
+        background-color: rgba(28, 31, 76, 0.6);
+    }
+
+    .bottom-button-container button:disabled {
+        background-color: #8D949A;
+        /* outline:none; */
+    }
+
+    .op-btn i {
+        font-size: 40px;
+    }
+
+    .op-btn span{
+        font-size: 40px;
+    }
+
+    .smb-confirm-button-class {
+        font-family: Microsoft JhengHei;
+        font-size: 24px;
+        font-weight: bold;
+        color: #ffffff;
+        border-radius: 6px;
+        border: none;
+        outline: none;
+        width: 90px;
+        height: 50px;
+        line-height: 50px;
+        background-color: #3085D6;
+        margin: auto 3px;
+    }
+
+    .smb-confirm-button-class:hover {
+        background-color: #2B77C0;
+    }
+
+    .smb-confirm-button-class:active {
+        background-color: #266AAB;
+    }
+
+    .smb-cancel-button-class {
+        font-family: Microsoft JhengHei;
+        font-size: 24px;
+        font-weight: bold;
+        color: #ffffff;
+        border-radius: 6px;
+        border: none;
+        outline: none;
+        width: 90px;
+        height: 50px;
+        line-height: 50px;
+        background-color: #AAAAAA;
+        margin: auto 3px;
+    }
+
+    .smb-cancel-button-class:hover {
+        background-color: #999999;
+    }
+
+    .smb-cancel-button-class:active {
+        background-color: #888888;
+    }
+
+</style>
+<body>
+    <div class="top-bar-container">
+        <div class="top-bar-identity">
+            <p id="top-worker-info" th:if="${session.machineId} == null" th:text="${session.processName} + '/' + ${session.nickName}"></p>
+            <p id="top-worker-info" th:if="${session.machineId} != null" th:text="${session.processName} + '/' + ${session.nickName} + '/' + ${session.machineId}"></p>
+            <p id="top-worker-info-process" th:text="${session.processCode}" style="display: none;"></p>
+        </div>
+        <div class="top-bar-status">
+            <h2>工作確認</h2>
+        </div>
+        <form class="logout-form" th:action="@{/logout}" method="POST" id="logout-form">
+            <div class="top-bar-function">
+                <button class="top-btn" id="logout-btn">清除</button>
+            </div>
+        </form>
+    </div>
+    <div class="mainframe-container">
+        <div class="task-info-container">
+            <div class="task-info-material">
+                <span>工件料號&nbsp;:&nbsp;</span>
+                <!-- <input class="task-info-text" type="text" th:placeholder="#{plzEnterMaterial}" name="keyinId" id="keyinId" autocomplete="off"> -->
+                <input class="task-info-text" type="text" placeholder="請輸入料號" name="keyinId" id="keyinId" autocomplete="off">
+            </div>
+            <div class="task-info-material">
+                <span>工件數量&nbsp;:&nbsp;</span>
+                <!-- <input class="task-info-text" type="text" th:placeholder="#{expectFinishCnt}" name="expectCnt" id="expectCnt" autocomplete="off"> -->
+                <input class="task-info-text" type="text" placeholder="預計完成數量" name="expectCnt" id="expectCnt" autocomplete="off">
+            </div>
+        </div>
+        <div class="bottom-button-container confirm-work-container">
+            <div>
+                <button class="op-btn" id="back-list-btn" onclick="goBackAndRefresh()">
+                    <i class="fa fa-times"></i>
+                    <!-- <span th:text=" #{backToList}"></span> -->
+                    <span>&nbsp;取消</span>
+                </button>
+            </div>
+            <div>
+                <button class="op-btn" id="start-task-btn">
+                    <i class="fa fa-play-circle"></i>
+                    <!-- <span th:text=" #{confirmTask}"></span> -->
+                    <span>&nbsp;開工</span>
+                </button>
+            </div>
+        </div>
+        <div class="bottom-button-container work-action-container" style="display: none;">
+            <div>
+                <button class="op-btn" id="pause-work-btn">
+                    <i class="fa fa-pause-circle"></i>
+                    <!-- <span th:text=" #{pauseWork}"></span> -->
+                    <span> 暫停</span>
+                </button>
+            </div>
+            <div>
+                <button class="op-btn" id="error-occur-btn">
+                    <i class="fa fa-exclamation-circle"></i>
+                    <!-- <span th:text=" #{exceptionReport}"></span> -->
+                    <span> 異常</span>
+                </button>
+            </div>
+            <div>
+                <button class="op-btn" id="finish-work-btn">
+                    <i class="fa fa-stop-circle"></i>
+                    <!-- <span th:text=" #{completeWork}"></span> -->
+                    <span> 完工</span>
+                </button>
+            </div>
+            
+        </div>
+        <!-- <form th:action="@{/util/changeSessionLanguage}" method="POST">
+            <input name="lang" type="hidden" value="zh_tw"  />
+            <button>切換為中文</button>
+         </form>
+         <form th:action="@{/util/changeSessionLanguage}" method="POST">
+            <input name="lang" type="hidden" value="en_us" />
+            <button>Switch to English</button>
+         </form> -->
+         <div id="lang-info" style="display: none;" th:text=${session.localeLang}></div>
+    </div>
+    <script th:src="@{/assets/plugins/jquery/jquery.js}" type="text/javascript"></script>
+    <script th:src="@{/assets/plugins/dist/sweetalert2.all.min.js}" type="text/javascript"></script>
+    <script th:src="@{/assets/plugins/i18n/jquery.i18n.properties-min-1.0.9.js}" type="text/javascript"></script>
+    <script>
+
+        // i18n TryTry
+        $(function(){
+            $.i18n.properties({
+                name : 'messages', //資源文件名稱
+                path : '/i18n/', //資源文件路徑
+                mode : 'map', //用Map的方式使用資源文件中的值
+                language: document.getElementById('lang-info').innerHTML
+            });
+        });
+
+        function i18n(labelKey) {
+            try {
+                return $.i18n.prop(labelKey);
+            } catch (e) {
+                console.error(e);
+                return labelKey;
+            }
+        }
+        // ------------------------
+
+        const smartBOSSalertButtons = Swal.mixin({
+            customClass: {
+                confirmButton: 'smb-confirm-button-class',
+                cancelButton: 'smb-cancel-button-class'
+            },
+            buttonsStyling: false
+        });
+
+        // 回上一頁，目前尚有重新提交表單的問題 (WELD之外)
+        //20200901 check for new version
+        function goBackAndRefresh(){
+            window.history.back();
+        }
+
+        // 重複的 part 拉出來寫，手動輸入點選確認 + 前一頁派工單選完直接進入此 action
+        //20200901 modify for new version
+        function frozenInputAndReadyToWork(){
+            document.getElementById('keyinId').disabled = true;
+            document.getElementById('expectCnt').disabled = true;
+            // $('#start-task-btn i').removeClass('fa-check-double');
+            // $('#start-task-btn i').addClass('fa-play-circle');
+            // $('#start-task-btn span').text(' 開始工作');
+            // $('#start-task-btn span').text(' ' + i18n("startWork"));
+            // $('#start-task-btn').addClass('start');
+        }
+
+        // work log 資料準備，分成手動輸入以及選取派工單兩種方式
+        //20200901 check for new version
+        function recordWorkLog(detail, state, eDoneCnt){
+            var worker, machine = null, material, process, cnt, state, dpUuid = null;
+            if (detail != null){
+                if(detail.assignWorker == null){
+                    worker = thisWorker;
+                } else {
+                    worker = detail.assignWorker;
+                }
+                if(detail.assignMachine == null){
+                    machine = thisMachine
+                } else {
+                    machine = detail.assignMachine;
+                }
+                material = detail.materialId;
+                process = detail.processStep;
+                cnt = $('#expectCnt').val();
+                dpUuid = detail.uuid;
+            } else {
+                worker = thisWorker;
+                process = thisProcess;
+                machine = thisMachine;
+                material = $('#keyinId').val().trim();
+                cnt = $('#expectCnt').val();
+            }
+            //異常回報，完成數量需另外輸入
+            if(state == 3){
+                cnt = eDoneCnt;
+            }
+            insertWorkLog(worker, machine, material, process, cnt, state, dpUuid);
+        }
+
+        // insert work log 實際動作，透過 jQuery ajax 後端 API
+        //20200901 check for new version
+        function insertWorkLog(workerId, machineId, materialId, processStep, materialCnt, state, dpUuid){
+            $.ajax({
+                url: "/working/insertWorkLog",
+                type: "POST",
+                async: false,
+                data: {
+                    "workerId": workerId,
+                    "machineId": machineId,
+                    "materialId": materialId,
+                    "processStep": processStep,
+                    "materialCnt": materialCnt,
+                    "state": state,
+                    "dispatchUUID": dpUuid
+                },
+                dataType: 'json',
+                beforeSend: function() {
+                //請求前的處理
+                },
+                success: function(response){
+                //請求成功的處理
+                    // return new Promise(function(resolve, reject){
+                    //     resolve(response.retStatus);
+                    // });
+                },
+                complete: function() {
+                //請求完成的處理
+                },
+                error: function() {
+                //請求出錯處理
+                }
+            });
+        }
+
+        // 回覆報工資訊，透過 jQuery ajax 後端 API
+        //20200901 check for new version
+        function reportWorkStats(dispatchUUID, workerId, machineId, materialId, processStep){
+            $.ajax({
+                url: "/working/reportWorkStats",
+                type: "POST",
+                async: false,
+                data: {
+                    "workerId": workerId,
+                    "machineId": machineId,
+                    "materialId": materialId,
+                    "processStep": processStep,
+                    "dispatchUUID": dispatchUUID
+                },
+                dataType: 'json',
+                beforeSend: function() {
+                //請求前的處理
+                },
+                success: function(response){
+                //請求成功的處理
+                },
+                complete: function() {
+                //請求完成的處理
+                },
+                error: function() {
+                //請求出錯處理
+                }
+            });
+        }
+
+        // 更改派工單狀態，透過 jQuery ajax 後端 API
+        //20200901 check for new version
+        function updateDispatchStatus(dispatchUUID, status){
+            $.ajax({
+                url: "/working/updateDispatchStatus",
+                type: "POST",
+                async: false,
+                data: {
+                    "dispatchUUID": dispatchUUID,
+                    "status": status
+                },
+                dataType: 'json',
+                beforeSend: function() {
+                //請求前的處理
+                },
+                success: function(response){
+                //請求成功的處理
+                },
+                complete: function() {
+                //請求完成的處理
+                },
+                error: function() {
+                //請求出錯處理
+                }
+            });
+        }
+
+        //20200901 check for new version
+        function switchToFinishPage(){
+            var urlParts = location.href.toString().split("/");
+            var target = location.href.toString().replace(urlParts[urlParts.length-2],"working").replace(urlParts[urlParts.length-1], "jobFinish");
+            window.location.href = target;
+        }
+
+        //20200901 modify for new version
+        function setWebByLastState(state){
+            $('.confirm-work-container').css('display', 'none');
+            $('.work-action-container').css('display', 'flex');
+            // $('#logout-btn').attr('display', 'none');
+            $('#logout-btn').css('display', 'none');
+            document.getElementById('keyinId').disabled = true;
+            document.getElementById('expectCnt').disabled = true;
+            $('.top-bar-status h2').text('工作進行');
+            switch(state){
+                case 1:
+                case 5:
+                    console.log("On-going Status!!");
+                    // $('.top-bar-status h2').text('工作進行');
+                    // $('.top-bar-status h2').text(i18n('workOngoing'));
+                    break;
+                case 2:
+                    console.log("Pause Status!!");
+                    $('#finish-work-btn').attr('disabled', true);
+                    $('#error-occur-btn').attr('disabled', true);
+                    $('#pause-work-btn').addClass('pause');
+                    $('#pause-work-btn span').text(' 繼續');
+                    // $('#pause-work-btn span').text(' ' + i18n('resumeWork'));
+                    $('#pause-work-btn i').removeClass('fa-pause-circle');
+                    $('#pause-work-btn i').addClass('fa-play-circle');
+                    // $('.top-bar-status h2').text('工作暫停');
+                    // $('.top-bar-status h2').text(i18n('workPause'));
+                    break;
+                default:
+                    //do nothing
+            }
+        }
+
+        //20200901 check for new version
+        function reloadLastWorkStatus(){
+            $.ajax({
+                url: "/working/getCurrentWorkState",
+                type: "POST",
+                async: false,
+                dataType: 'json',
+                beforeSend: function() {
+                //請求前的處理
+                },
+                success: function(response){
+                //請求成功的處理
+                    if(response && response.state != 4 && response.state != 3){
+                        // console.log("條件符合，進入reset頁面程序");
+                        setWebByLastState(response.state);
+                        $('#keyinId').val(response.materialId);
+                        // $('#expectCnt').val(response.materialCnt);
+                        $('#expectCnt').val('1');
+                    } else {
+                        // console.log("什麼事都沒發生");
+                    }
+                },
+                complete: function() {
+                //請求完成的處理
+                },
+                error: function() {
+                //請求出錯處理
+                }
+            });
+        }
+
+        var dispatchUUID = null;
+        var dispatchDetail = null;
+        var thisWorker;
+        var thisProcess;
+        var thisMachine;
+        var reg = /^[0-9]+$/;
+
+        //20200901 modify for new version
+        $(document).ready(function() {
+            //先擷取參數
+            var workerInfo = $('#top-worker-info').text().split('/');
+            // thisProcess = workerInfo[0];
+            thisProcess = $('#top-worker-info-process').text();
+            thisWorker = workerInfo[1];
+            if (workerInfo.length == 3){
+                thisMachine = workerInfo[2];
+            } else{
+                thisMachine = null;
+            }
+
+            // 2020.08.08 State Keep Version, 每次 load 先從 DB 撈回此工人最新的 work status
+            reloadLastWorkStatus();
+
+            // 藉由 dispatch order 的 uuid 從 db 取出資訊
+            var currentUrl = location.href;
+            if(currentUrl.includes("UUID")){
+                dispatchUUID = currentUrl.split('=')[1];
+                $.ajax({
+                    url: "/task/findDispatchDetail",
+                    type: "POST",
+                    async: true,
+                    data: {"dispatchUUID" : dispatchUUID},
+                    dataType: 'json',
+                    beforeSend: function() {
+                    //請求前的處理
+                    },
+                    success: function(response){
+                        $('#keyinId').val(response.materialId);
+                        $('#expectCnt').val('1');        
+                        // if(response.finishCnt == null){
+                        //     $('#expectCnt').val(response.totalCnt);
+                        // }
+                        // else{
+                        //     $('#expectCnt').val(response.totalCnt - response.finishCnt);
+                        // }
+                        //將回值存回變數dispatchDetail
+                        dispatchDetail = response;
+                    },
+                    complete: function() {
+                    //請求完成的處理
+                    },
+                    error: function() {
+                    //請求出錯處理
+                    }
+                });
+                frozenInputAndReadyToWork();
+                // $('.top-bar-status h2').text('工作準備(工單選定)');
+                // $('.top-bar-status h2').text(i18n('taskPrepareConfirmOrder'));
+            } else if (currentUrl.includes("partID")) {
+                var partID = currentUrl.split('=')[1];
+                $('#keyinId').val(partID);
+                $('#expectCnt').val('1');
+                frozenInputAndReadyToWork();
+            }
+        });
+
+        //確定工作 + 開始工作
+        //20200901 modify for new version
+        $('#start-task-btn').on('click', function(){
+            if ($('#keyinId').val().trim().length == 0 || $('#expectCnt').val().trim().length == 0){
+                smartBOSSalertButtons.fire({
+                    // title: i18n('paramError'),
+                    title: "<p style=\"font-size: 32px; font-weight: bold;\">工件資訊錯誤</p>",
+                    // text: i18n('errorMsgEnterCompleteInfo'),
+                    html: "<p style=\"font-size: 20px; font-weight: bold; color: red;\">請輸入完整報工資訊</p>",
+                    icon: 'warning'
+                });
+            // } else if (parseFloat($('#expectCnt').val()).toString() == "NaN") {
+            } else if (!reg.test($('#expectCnt').val())) {
+                smartBOSSalertButtons.fire({
+                    // title: i18n('paramError'),
+                    title: "<p style=\"font-size: 32px; font-weight: bold;\">工件資訊錯誤</p>",
+                    // text: i18n('errorMsgCntShouldBeInt'),
+                    html: "<p style=\"font-size: 20px; font-weight: bold; color: red;\">工件數量請輸入正整數</p>",
+                    icon: 'warning'
+                });
+            } else {
+                frozenInputAndReadyToWork();
+                //開始工作後disable登出button
+                // $('#logout-btn').attr('display', 'none');
+                $('#logout-btn').css('display', 'none');
+                //隱藏確認工作功能按鈕，開啟工作中按鈕
+                $('.confirm-work-container').css('display', 'none');
+                $('.work-action-container').css('display', 'flex');
+                //表示已經進入工作頁面，中途不得登出
+                $('.top-bar-status h2').text('工作進行');
+                // $('.top-bar-status h2').text(i18n('workOngoing'));
+                //寫worklog and state = 1 (START)
+                recordWorkLog(dispatchDetail, 1, 0);
+                if(dispatchUUID != null){
+                    updateDispatchStatus(dispatchUUID, "In Process");
+                }
+            }
+        });
+
+        // 暫停工作
+        //20200901 modify for new version
+        $('#pause-work-btn').on('click', function(){
+            if ($(this).hasClass('pause')){
+                // 從工作暫停狀態恢復工作
+                $('#finish-work-btn').attr('disabled', false); 
+                $('#error-occur-btn').attr('disabled', false);
+                $('#pause-work-btn').removeClass('pause'); 
+                $('#pause-work-btn span').text(' 暫停');
+                // $('#pause-work-btn span').text(' ' + i18n('pauseWork'));
+                $('#pause-work-btn i').removeClass('fa-play-circle');
+                $('#pause-work-btn i').addClass('fa-pause-circle');
+                // $('.top-bar-status h2').text('工作進行');
+                // $('.top-bar-status h2').text(i18n('workOngoing'));
+                //寫worklog and state = 5 (RESUME)
+                recordWorkLog(dispatchDetail, 5, 0);
+            } else {
+                //暫停工作 action
+                $('#finish-work-btn').attr('disabled', true);
+                $('#error-occur-btn').attr('disabled', true);
+                $('#pause-work-btn').addClass('pause');
+                $('#pause-work-btn span').text(' 繼續');
+                // $('#pause-work-btn span').text(' ' + i18n('resumeWork'));
+                $('#pause-work-btn i').removeClass('fa-pause-circle');
+                $('#pause-work-btn i').addClass('fa-play-circle');
+                // $('.top-bar-status h2').text('工作暫停');
+                // $('.top-bar-status h2').text(i18n('workPause'));
+                //寫worklog and state = 2 (PAUSE)
+                recordWorkLog(dispatchDetail, 2, 0);
+            }
+        });
+
+        // 發生異常
+        //20200901 modify for new version
+        $('#error-occur-btn').on('click', function(){
+            // var taskInfo = i18n('materialNumber') + ": " + $('#keyinId').val().trim() + " / " + i18n('expectFinishCnt') + ": " + $('#expectCnt').val();
+            var taskInfo = "工件料號: " + $('#keyinId').val().trim() + " / 預計完成數量: " + $('#expectCnt').val();
+            var reportInfo = "因異常無法完成此工件";
+            smartBOSSalertButtons.fire({
+                // title: i18n('reportConfirm'),
+                title: "<p style=\"font-size: 32px; font-weight: bold;\">異常回報</p>",
+                html: "<p style=\"font-size: 20px; font-weight: bold;\">" + taskInfo + "</p></br><p style=\"color: red; font-size: 30px; font-weight: bold;\">" + reportInfo + "</p>", 
+                width: 600,
+                showCancelButton: true,
+                // cancelButtonText: i18n('cancel'),
+                cancelButtonText: 'NO',
+                // confirmButtonText: i18n('firm'),
+                confirmButtonText: 'OK'
+            }).then((result) => {
+                if (result.value) {
+                    //寫worklog and state = 3 (EXCEPTION_REPORT)
+                    recordWorkLog(dispatchDetail, 3, 0);
+                    //寫reportLog & update dispatch order status
+                    reportWorkStats(dispatchUUID, thisWorker, thisMachine, $('#keyinId').val().trim(), thisProcess);
+                    //跳到完成頁面
+                    switchToFinishPage(thisWorker);
+                }
+            });
+        });
+
+        // 完成工作 + 回報工作
+        //20200901 modify for new version
+        $('#finish-work-btn').on('click', function(){
+            // var taskInfo = i18n('materialNumber') + ": " + $('#keyinId').val().trim() + " / " + i18n('expectFinishCnt') + ": " + $('#expectCnt').val();
+            var taskInfo = "工件料號: " + $('#keyinId').val().trim() + " / 預計完成數量: " + $('#expectCnt').val();
+            //正常狀態下回報完成，直接抓預計完成數量
+            // var reportInfo = i18n('actualFinishCnt') + ": " + $('#expectCnt').val();
+            var reportInfo = "實際完成數量: " + $('#expectCnt').val();
+            smartBOSSalertButtons.fire({
+                // title: i18n('reportConfirm'),
+                title: "<p style=\"font-size: 32px; font-weight: bold;\">工作完成</p>",
+                html: "<p style=\"font-size: 20px; font-weight: bold;\">" + taskInfo + "</p></br><p style=\"color: blue; font-size: 30px; font-weight: bold;\">" + reportInfo + "</p>", 
+                width: 600,
+                showCancelButton: true,
+                // cancelButtonText: i18n('cancel'),
+                cancelButtonText: "NO",
+                // confirmButtonText: i18n('firm'),
+                confirmButtonText: 'OK'
+            }).then((result) => {
+                if (result.value) {
+                    //寫worklog and state = 4 (NORMAL_REPORT)
+                    recordWorkLog(dispatchDetail, 4, 0);
+                    //寫reportLog & update dispatch order status
+                    reportWorkStats(dispatchUUID, thisWorker, thisMachine, $('#keyinId').val().trim(), thisProcess);
+                    //跳到完成頁面
+                    switchToFinishPage(thisWorker);
+                }
+            });
+        });
+
+
+        
+
+    </script>
+
+</body>
+</html>

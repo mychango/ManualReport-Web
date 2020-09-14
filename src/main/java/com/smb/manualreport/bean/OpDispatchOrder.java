@@ -1,5 +1,7 @@
 package com.smb.manualreport.bean;
 
+import com.smb.manualreport.utililty.Constant;
+
 import java.io.Serializable;
 
 public class OpDispatchOrder implements Serializable {
@@ -62,6 +64,8 @@ public class OpDispatchOrder implements Serializable {
     }
 
     public void setStatus(String status) {
+//        為了報表上的呈現
+//        this.status = Constant.DISPATCH_STATUS_MAP.get(status);
         this.status = status;
     }
 

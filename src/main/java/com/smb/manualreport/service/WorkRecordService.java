@@ -39,6 +39,9 @@ public class WorkRecordService {
 
     public WorkLog findWorkLogByWorker(String workerId){
         List<WorkLog> listWorkLog = workLogMapper.findWorkLogByWorker(workerId);
+        if(listWorkLog == null || listWorkLog.size() == 0){
+            return null;
+        }
         return listWorkLog.get(0);
     }
 

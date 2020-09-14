@@ -2,6 +2,7 @@ package com.smb.manualreport.security;
 
 import com.smb.manualreport.bean.UserInfo;
 import com.smb.manualreport.service.UserInfoService;
+import com.smb.manualreport.utililty.Constant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,11 +37,24 @@ public class MRSUserDetailsService implements UserDetailsService {
         }
 
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-        request.getSession().setAttribute("userId", userInfo.getUsername());
+        request.getSession().setAttribute("userName", userInfo.getUsername());
         request.getSession().setAttribute("nickName", userInfo.getNickname());
         request.getSession().setAttribute("realName", userInfo.getRealname());
         request.getSession().setAttribute("identity", userInfo.getPrivilege());
-        request.getSession().setAttribute("area", userInfo.getProcessArea());
+        if(userInfo.getProcessArea().isEmpty() || userInfo.getProcessArea() == null) {
+            throw new UsernameNotFoundException("This account have no process area: " + account);
+        } else {
+            String loginProcessStep = request.getParameter("process");
+            if(loginProcessStep == null || loginProcessStep.isEmpty()) {
+                logger.info(">>> Get process area information from database");
+                request.getSession().setAttribute("processCode", userInfo.getProcessArea());
+                request.getSession().setAttribute("processName", Constant.PROCESS_MAP_LANGUAGE_MAP.get(userInfo.getProcessArea()));
+            } else {
+                logger.info(">>> Get process area information from web button");
+                request.getSession().setAttribute("processCode", loginProcessStep);
+                request.getSession().setAttribute("processName", Constant.PROCESS_MAP_LANGUAGE_MAP.get(loginProcessStep));
+            }
+        }
         request.getSession().removeAttribute("machineId");
 
         /*** Authorities 使用方式參考 ***/

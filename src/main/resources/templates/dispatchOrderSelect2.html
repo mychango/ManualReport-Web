@@ -4,186 +4,72 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>報工系統</title>
-    <link th:href="@{/assets/plugins/datatables/css/jquery.dataTables.min.css}" rel="stylesheet" type="text/css" />
-    <link rel="stylesheet" th:href="@{/assets/plugins/fontawesome-free/css/all.min.css}">
+    <!-- <link th:href="@{/assets/plugins/datatables/css/jquery.dataTables.min.css}" rel="stylesheet" type="text/css" /> -->
+    <link th:href="@{/assets/plugins/fontawesome-free/css/all.min.css}" rel="stylesheet">
+    <link th:href="@{/assets/plugins/DataTables/datatables.min.css}" rel="stylesheet" >
+    <link th:href="@{/assets/css/dporder.css}" rel="stylesheet">
 </head>
-<style>
-    html, body, div, span, applet, object, iframe,
-    h1, h2, h3, h4, h5, h6, p, blockquote, pre,
-    a, abbr, acronym, address, big, cite, code,
-    del, dfn, em, img, ins, kbd, q, s, samp,
-    small, strike, strong, sub, sup, tt, var,
-    b, u, i, center,
-    dl, dt, dd, ol, ul, li,
-    fieldset, form, label, legend,
-    table, caption, tbody, tfoot, thead, tr, th, td,
-    article, aside, canvas, details, embed, 
-    figure, figcaption, footer, header, hgroup, 
-    menu, nav, output, ruby, section, summary,
-    time, mark, audio, video {
-        margin: 0;
-        padding: 0;
-        border: 0;
-        font-size: 100%;
-        font: inherit;
-        vertical-align: baseline;
-    }
-    article, aside, details, figcaption, figure, 
-    footer, header, hgroup, menu, nav, section {
-        display: block;
-    }
-    body {
-        background-color: #EBEBEB;
-        /* width: 100%; */
-        background-size: cover;
-    }
-    ol, ul {
-        list-style: none;
-    }
-    blockquote, q {
-        quotes: none;
-    }
-    blockquote:before, blockquote:after,
-    q:before, q:after {
-        content: '';
-        content: none;
-    }
-    table {
-        border-collapse: collapse;
-        border-spacing: 0;
-    }
-    body {
-        font-family: Microsoft JhengHei;
-    }
-
-    .top-bar-container {
-        background-color: #1C1F4C;
-        width: 100%;
-        height: 50px;
-        color: #ffffff;
-        display: flex;
-        justify-content: space-between;
-    }
-
-    .top-bar-container .top-bar-identity {
-        padding-left: 10px;
-        font-size: 20px;
-        line-height: 50px;
-        width: 100px;
-        white-space: nowrap;
-    } 
-
-    .top-bar-container .top-bar-status {
-        font-size: 30px;
-        line-height: 50px;
-        font-weight: bold;
-    }
-
-    .top-bar-container .top-bar-function {        
-        padding-right: 10px;
-        /* 垂直置中尚缺好方法 */
-        padding-top: 11px;  
-        height: 100%;
-    }
-
-    .logout-form button {
-        font-family: Microsoft JhengHei;
-        font-size: 20px;
-        border-radius: 4px;
-        border: none;
-        font-weight: bold;
-        outline: none;
-    }
-
-    .dispatch-order-container {
-        padding-top: 24px;
-        font-size: 14px;
-        padding-left: 10px;
-        padding-right: 10px;
-    }
-
-    .order-table th {
-        text-align: left;
-        font-size: 16px;
-    }
-
-    .order-table .table-short {
-        padding-left: 24px;
-    }
-
-    .bottom-button-container {
-        display: flex;
-        justify-content:center;
-    }
-
-    .bottom-button-container button {
-        font-family: Microsoft JhengHei;
-        font-size: 24px;
-        width: 200px;
-        height: 120px;
-        border-radius: 8px;
-        border: none;
-        background-color: #1C1F4C;
-        color: #ffffff;
-        margin: 0 10px;
-        outline:none;
-    }
-
-    .bottom-button-container button:hover {
-        background-color: rgba(28, 31, 76, 0.8);
-        /* outline:none; */
-    }
-
-    .bottom-button-container button:active {
-        background-color: rgba(28, 31, 76, 0.6);
-        /* outline:none; */
-    }
-
-</style>
 <body>    
     <div class="top-bar-container">
         <div class="top-bar-identity">
-            <p class=work-info th:if="${session.machineId} == null" th:text="${session.area} + '/' + ${session.nickName}"></p>
-            <p class=work-info th:if="${session.machineId} != null" th:text="${session.area} + '/' + ${session.nickName} + '/' + ${session.machineId}"></p>
+            <p id="top-worker-info" th:if="${session.machineId} == null" th:text="${session.processName} + '/' + ${session.nickName}"></p>
+            <p id="top-worker-info" th:if="${session.machineId} != null" th:text="${session.processName} + '/' + ${session.nickName} + '/' + ${session.machineId}"></p>
         </div>
         <div class="top-bar-status">
-            <h2 th:text="#{taskPrepareSelectOrder}"></h2>
+            <!-- <h2>選擇工件</h2> -->
+            <h2 th:text="#{selectPart_title}"></h2>
         </div>
         <div>
         <form class="logout-form" th:action="@{/logout}" method="POST">
             <div class="top-bar-function">
-                <button class="top-btn" id="logout-btn" th:text="#{logout}"></button>
+                <!-- <button class="top-btn" id="logout-btn">清除</button> -->
+                <button class="top-btn" id="logout-btn" th:text="#{common_reset}"></button>
             </div>
         </form>
         </div>
     </div>
     <div class="mainframe-container">
+        <!-- <h3 class="input-title">輸入工件料號</h3> -->
+        <h3 class="input-title" th:text="#{selectPart_enterPartID}"></h3>
+        <div class="table-filter-containter">
+            <!-- <input type="text" class="form-control form-control-sm" aria-controls="dispatch-order-table"> -->
+            <!-- <input type="text" id="task-filter" placeholder="請輸入關鍵字" autofocus="autofocus"> -->
+            <input type="text" id="task-filter" th:placeholder="#{selectPart_keyword}" autofocus="autofocus">
+        </div>
         <div class="dispatch-order-container">
-            <table class="order-table display" id="dispatch-order-table" cellspacing="0" width="100%">
+            <table class="table" id="dispatch-order-table" cellspacing="0" style="width: 100%;">
             <!-- <table class="order-table display" id="dispatch-order-table" role="grid" style="width: 100%;"></table> -->
                 <thead>
                     <tr>
-                        <th></th>
-                        <th>製令編號</th>
-                        <th>派工單號</th>
-                        <th>工件料號</th>
-                        <th>已完成數</th>
-                        <th>工件總數</th>                        
-                        <th>工單狀態</th>
-                        <th>預計完成時間</th>
+                        <!-- <th class="table-col-name first-col">勾選</th> -->
+                        <th class="table-col-name first-col" th:text="#{dt_check}">勾選</th>
+                        <!-- <th class="table-col-name">製令編號</th> -->
+                        <th class="table-col-name" th:text="#{dt_moid}"></th>
+                        <!-- <th class="table-col-name">派工單號</th> -->
+                        <th class="table-col-name" th:text="#{dt_dpid}"></th>
+                        <!-- <th class="table-col-name">工件料號</th> -->
+                        <th class="table-col-name" th:text="#{dt_part}"></th>
+                        <!-- <th class="table-col-name">已完成數</th> -->
+                        <th class="table-col-name" th:text="#{dt_finishCnt}"></th>
+                        <!-- <th class="table-col-name">工件總數</th> -->
+                        <th class="table-col-name" th:text="#{dt_totalCnt}"></th>
+                        <!-- <th class="table-col-name">工單狀態</th> -->
+                        <th class="table-col-name" th:text="#{dt_status}"></th>
+                        <!-- <th class="table-col-name last-col">預計完成時間</th> -->
+                        <th class="table-col-name" th:text="#{dt_expectOffline}"></th>
                         <th style="display: none;">UUID</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr th:each="m:${listOpDispatchOrder}" row="role" th:class="${m.dispatchId}">
-                        <td></td>
-                        <td th:text="${m.mfgorderId}"></td>
-                        <td th:text="${m.dispatchId}"></td>
-                        <td th:text="${m.materialId}"></td>
-                        <td class="table-short" th:text="${m.finishCnt==null ? 0 : m.finishCnt}"></td>
-                        <td class="table-short" th:text="${m.totalCnt}"></td>
-                        <td class="table-short" th:text="${m.status}"></td>
-                        <td th:text="${m.expectFinishDt}"></td>
+                        <td class="task-content first-col"></td>
+                        <td class="task-content" th:text="${m.mfgorderId}"></td>
+                        <td class="task-content" th:text="${m.dispatchId}"></td>
+                        <td class="task-content" th:text="${m.materialId}"></td>
+                        <td class="task-content" th:text="${m.finishCnt==null ? 0 : m.finishCnt}"></td>
+                        <td class="task-content" th:text="${m.totalCnt}"></td>
+                        <td class="task-content" th:text="${m.status}"></td>
+                        <td class="task-content last-col" th:text="${m.expectFinishDt}"></td>
                         <td th:text="${m.uuid}" style="display: none;"></td>
                     </tr>
                 </tbody>
@@ -192,30 +78,31 @@
         <div class="bottom-button-container">
             <div>
                 <button class="op-btn" id="manual-keyin-btn">
-                    <i class="fa fa-keyboard"></i>
-                    <span th:text=" #{manualKeyIn}"></span>
+                    <i class="fa fa-bolt"></i>
+                    <!-- <span th:text=" #{manualKeyIn}"></span> -->
+                    <!-- <span>&nbsp;強制</span> -->
+                    <span th:text="#{selectPart_force}"></span>
                 </button>
             </div>
             <div>
                 <button class="op-btn" id="select-task-btn">
                     <i class="fa fa-check"></i>
-                    <span th:text=" #{selectTask}"></span>
+                    <!-- <span th:text=" #{selectTask}"></span> -->
+                    <!-- <span>&nbsp;確定</span> -->
+                    <span th:text="#{selectPart_confirm}"></span>
                 </button>
             </div>
         </div>
          <div id="lang-info" style="display: none;" th:text=${session.localeLang}></div>
     </div>
-    <script th:src="@{/assets/plugins/jquery/jquery.js}" type="text/javascript"></script>
-    <script th:src="@{/assets/plugins/datatables/jquery.dataTables.js}" type="text/javascript"></script>
+    <!-- <script th:src="@{/assets/plugins/jquery/jquery.js}" type="text/javascript"></script> -->
+    <!-- <script th:src="@{/assets/plugins/datatables/jquery.dataTables.js}" type="text/javascript"></script> -->
+    <script th:src="@{/assets/plugins/DataTables/datatables.min.js}" type="text/javascript"></script>
     <script th:src="@{/assets/plugins/dist/sweetalert2.all.min.js}" type="text/javascript"></script>
     <script th:src="@{/assets/plugins/i18n/jquery.i18n.properties-min-1.0.9.js}" type="text/javascript"></script>
-    <!-- <script th:src="@{/assets/plugins/datatables2/datatables2.min.js}" type="text/javascript"></script> -->
-    <!-- <link rel="stylesheet" th:href="@{/assets/plugins/datatables2/datatables2.min.css}"> -->
-    <script th:src="@{/assets/plugins/datatables2/datatables-select2.min.js}" type="text/javascript"></script>
-    <link rel="stylesheet" th:href="@{/assets/plugins/datatables2/datatables-select2.min.css}">
+    
     <script>
 
- 
         function i18n(labelKey) {
             try {
                 return $.i18n.prop(labelKey);
@@ -235,39 +122,107 @@
                 mode : 'map', //用Map的方式使用資源文件中的值
                 language: document.getElementById('lang-info').innerHTML
             });
+            customizeFor18n();
         })
+
+        function customizeFor18n() {
+            console.log($('#lang-info').text());
+            if($('#lang-info').text().toString().includes('en_US')){
+                $('.bottom-button-container button').css('width', '240px');
+                $('.bottom-button-container button').css('height', '150px');
+                $('.op-btn i').css('font-size', '30px');
+                $('.op-btn span').css('font-size', '30px');
+            } else if($('#lang-info').text().toString().includes('vi_VN')){
+                $('.bottom-button-container button').css('width', '260px');
+                $('.bottom-button-container button').css('height', '160px');
+                $('.op-btn i').css('font-size', '30px');
+                $('.op-btn span').css('font-size', '30px');
+                $('.op-btn span').css('font-weight', 'bold');
+                $('button,h2,h3,input,span').css('font-family', 'Vernada');
+            }
+        }
+
+        function customizeTableStyle() {
+            //column header css
+            $('table').css('border', 'none');
+            $('.table-col-name').css('font-size', '20px');
+            $('.table-col-name').css('color', '#595D6E');
+            $('.table-col-name').css('font-weight', 'bold');
+            $('.table-col-name').css('background-color', '#DEDEDE');
+            $('.table-col-name').css('border', '2px solid #EBEBEB');
+            $('.table-col-name').css('outline', 'none');
+            $('.task-content').css('font-size', '20px');
+            $('.task-content').css('color', 'black');
+            $('.task-content').css('background-color', 'white');
+            $('.task-content').css('border', '2px solid #EBEBEB');
+            $('.task-content').css('outline', 'none');
+            $('.first-col').css('border-top-left-radius', '16px');
+            $('.first-col').css('border-bottom-left-radius', '16px');
+            $('.last-col').css('border-top-right-radius', '16px');
+            $('.last-col').css('border-bottom-right-radius', '16px');
+            // $('.dataTables_empty').css('font-size', '20px');
+        }
 
         var dt;
         var selectedData;
         var dispatchUUID;
 
         $(document).ready(function() {
+            $('#dispatch-order-table tbody tr').removeClass('selected');
+            $('#task-filter').val('');
+
+            $('#manual-keyin-btn').attr('disabled', true);
+            $('#select-task-btn').attr('disabled', true);
+
             dt = $('#dispatch-order-table').DataTable({
+                // responsive: true,
+                lengthChange: false,
+                paging: false,
+                searching: true,
+                info: false,
+                // autoFill: true,
                 columnDefs: [{
                     orderable: false,
                     className: 'select-checkbox',
                     targets: 0
                 }],
-                select: {
-                    style: 'os',
-                    selector: 'td:first-child'
-                }
+                select: true
+                // select: {
+                //     style:    'os',
+                //     selector: 'td:first-child'
+                // }
             });
-    
-            $('#dispatch-order-table tbody tr').removeClass('selected');
 
-            // 選取 datatable 的 implementation
-            // $('#dispatch-order-table tbody').on( 'click', 'tr', function () {
-            //     if ( $(this).hasClass('selected') ) {
-            //         $(this).removeClass('selected');
-            //         dispatchUUID = null;
-            //     }
-            //     else {
-            //         dt.$('tr.selected').removeClass('selected');
-            //         $(this).addClass('selected');
-            //         dispatchUUID = dt.rows('.selected').data()[0][8];
-            //     }                
-            // } );
+            dt.on('select', function(e, tb, type, indexes){
+                $('#select-task-btn').attr('disabled', false);
+            });
+
+            dt.on('deselect', function(e, tb, type, indexes){
+                $('#select-task-btn').attr('disabled', true);
+            });
+            
+
+            customizeTableStyle();
+
+            $('#task-filter').on('keyup', function(){
+                dt.search(this.value).draw();
+                $('#dispatch-order-table tbody tr').removeClass('selected');
+                // console.log(dt.rows({filter:'applied'}).nodes().length);
+                // console.log(dt.rows({filter:'applied'}).data());
+                if(dt.rows({filter:'applied'}).nodes().length == 1){
+                    dt.row({filter:'applied'}).select();
+                    $('#manual-keyin-btn').attr('disabled', true);
+                    $('#select-task-btn').attr('disabled', false);
+                } else if (dt.rows({filter:'applied'}).nodes().length == 0) {
+                    $('#manual-keyin-btn').attr('disabled', false);
+                    $('#select-task-btn').attr('disabled', true);
+                } else {
+                    $('#manual-keyin-btn').attr('disabled', true);
+                    $('#select-task-btn').attr('disabled', true);
+                }
+                
+            });
+
         } );
 
         var urlParts = location.href.toString().split("/");
@@ -284,18 +239,12 @@
             // 導向 task/confirmTask 把 UUID 參數帶過去
             if (dispatchUUID != null){
                 window.location.href = target + "?dispatchUUID=" + dispatchUUID;
-            } else {
-                Swal.fire({
-                    title: i18n('paramError'),
-                    text: i18n('errorMsgHaventSelectTask'),
-                    icon: 'warning'
-                });
             }
         });
 
         $('#manual-keyin-btn').on('click', function(){
             // 導向 task/confirmTask 不帶參數
-            window.location.href = target;
+            window.location.href = target + "?partID=" + document.getElementById('task-filter').value;
         });
 
     </script>

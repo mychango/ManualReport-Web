@@ -30,6 +30,9 @@ public class UtilController {
         } else if(lang.equals(Constant.LANGUAGE_ENGLISH)){
 //            logger.info("Set EN");
             request.getSession().setAttribute(SessionLocaleResolver.LOCALE_SESSION_ATTRIBUTE_NAME, new Locale("en", "US"));
+        } else if(lang.equals(Constant.LANGUAGE_VIETNAMESE)){
+//            logger.info("Set VN");
+            request.getSession().setAttribute(SessionLocaleResolver.LOCALE_SESSION_ATTRIBUTE_NAME, new Locale("vi", "VN"));
         }
 
         request.getSession().setAttribute("localeLang", lang);

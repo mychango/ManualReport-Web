@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="tw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>報工系統</title>
+    <link th:href="@{/assets/css/finish_computer.css}" rel="stylesheet" media="only screen and (min-width: 1367px)">
+    <!-- iPad Pro -->
+    <!-- <link th:href="@{/assets/css/finish_pad.css}" rel="stylesheet" media="only screen and (min-width: 1024px) and (max-width: 1366px)"> -->
+    <link th:href="@{/assets/css/finish_pad.css}" rel="stylesheet" media="only screen and (max-width: 1366px)">
+</head>
+<body>
+    <div class="top-bar-container">
+        <div class="top-bar-identity">
+            <p id="top-worker-info" th:if="${session.machineId} == null" th:text="${session.processName} + '/' + ${session.nickName}"></p>
+            <p id="top-worker-info" th:if="${session.machineId} != null" th:text="${session.processName} + '/' + ${session.nickName} + '/' + ${session.machineId}"></p>
+        </div>
+        <div class="top-bar-status">
+            <!-- <h2>工作完成</h2> -->
+            <h3 th:text="#{finish_title}"></h3>
+        </div>
+        <form th:action="@{/logout}" method="POST" class="logout-form">
+            <div class="top-bar-function">
+                <!-- <button class="top-btn" id="logout-btn">清除</button> -->
+                <button class="top-btn" id="logout-btn" th:text="#{common_reset}"></button>
+            </div>
+        </form>
+    </div>
+    <div class="mainframe-container">
+        <div class="complete-info-container">
+            <!-- <p class="info-content" th:text="'工件料號 : ' + ${materialId}"></p>
+            <p class="info-content" th:text="'總計完成數量 : ' + ${materialCnt}"></p> -->
+            <p class="info-content" th:text="#{finish_partID} + ' : ' + ${materialId}"></p>
+            <p class="info-content" th:text="#{finish_totalCnt} + ' : ' + ${materialCnt}"></p>
+            <!-- <p class="info-memo">您已經完成工作回報</p> -->
+            <p class="info-memo" th:text="#{finish_reportDesc}"></p>
+        </div>
+        <div class=bottom-button-container>
+            <div>
+                <!-- <button class="op-btn" id="other-task-btn">其他工件</button> -->
+                <button class="op-btn" id="other-task-btn" th:text="#{finish_otherPart}"></button>
+            </div>
+        </div>
+    </div>
+    <div id="lang-info" style="display: none;" th:text=${session.localeLang}></div>
+    <script th:src="@{/assets/plugins/jquery/jquery.js}" type="text/javascript"></script>
+    <script>
+        $(function () {
+            customizeFor18n();
+        })
+
+        function customizeFor18n() {
+            console.log($('#lang-info').text());
+            if($('#lang-info').text().toString().includes('en_US')){
+                //do nothing
+            } else if($('#lang-info').text().toString().includes('vi_VN')){
+                $('body').css('font-family','Vernada');
+                $('h3,button,p').css('font-family','Vernada');
+                // $('#login-btn').css('font-family','Vernada');
+                // $('.input-group input').css('font-family','Vernada');
+            }
+        }
+
+        $('#other-task-btn').on('click', function(){
+            var urlParts = location.href.toString().split("/");
+            var target = location.href.toString().replace(urlParts[urlParts.length-2],"task").replace(urlParts[urlParts.length-1], "elementSelectOther");
+            window.location.href = target;
+            // console.log("準備跳頁囉");
+        });
+    </script>
+</body>
+</html>

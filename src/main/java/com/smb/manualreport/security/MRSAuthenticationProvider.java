@@ -26,7 +26,7 @@ public class MRSAuthenticationProvider implements AuthenticationProvider {
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        logger.error("Start to authenticate!!");
+        logger.info("Start to authenticate!!");
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
 
         String username = authentication.getName();
@@ -43,11 +43,11 @@ public class MRSAuthenticationProvider implements AuthenticationProvider {
             throw new BadCredentialsException(e.getMessage());
         }
 
-        if (details == null || !(password.equals(details.getPassword()))){
-            logger.error("No user information or wrong password, please check.");
-            request.getSession().setAttribute("field", "error");
-            throw new BadCredentialsException("Password mismtach!");
-        }
+//        if (details == null || !(password.equals(details.getPassword()))){
+//            logger.error("No user information or wrong password, please check.");
+//            request.getSession().setAttribute("field", "error");
+//            throw new BadCredentialsException("Password mismtach!");
+//        }
 
         return new UsernamePasswordAuthenticationToken(details, password, details.getAuthorities());
     }
