@@ -2,10 +2,7 @@ package com.smb.manualreport.mapper;
 
 import com.smb.manualreport.bean.OpDispatchOrder;
 import com.smb.manualreport.bean.SrcDispatchOrder;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.Update;
+import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 
@@ -19,12 +16,21 @@ public interface DispatchListMapper {
 
     @Select("<script>"
             + "select * from smb_op.dispatch_list where 1 = 1 "
+            + "<if test='workerId != null'> and (assign_worker = #{workerId} or assign_worker = #{userName}) </if>"
+            + "<if test='machineId != null'> and assign_machine = #{machineId} </if>"
+            + "and process_step = #{processStep} "
+            + "and status not in ('Finish', 'In Process', 'Delete') "
+            + "</script>")
+    List<OpDispatchOrder> findOpDispatchOrderByStepAndWorkerOrMachine(@Param("processStep") String processStep, @Param("workerId") String workerId, @Param("userName") String userName, @Param("machineId") String machineId);
+
+    @Select("<script>"
+            + "select * from smb_op.dispatch_list where 1 = 1 "
             + "<if test='workerId != null'> and assign_worker = #{workerId} </if>"
             + "<if test='machineId != null'> and assign_machine = #{machineId} </if>"
             + "and process_step = #{processStep} "
-            + "and status not in ('Finish', 'In Process') "
+            + "and status not in ('Finish', 'Delete') "
             + "</script>")
-    List<OpDispatchOrder> findOpDispatchOrderByStepAndWorkerOrMachine(@Param("processStep") String processStep, @Param("workerId") String workerId, @Param("machineId") String machineId);
+    List<OpDispatchOrder> findOpDispatchOrderByStepAndWorkerOrMachineWithProcessing(@Param("processStep") String processStep, @Param("workerId") String workerId, @Param("machineId") String machineId);
 
     @Select("select * from smb_op.dispatch_list where uuid = #{uuid}")
     OpDispatchOrder findOpDispatchOrderByUUID(@Param("uuid") String uuid);
@@ -41,13 +47,16 @@ public interface DispatchListMapper {
     @Update("update smb_op.dispatch_list set status = #{status} where uuid = #{uuid}")
     int updateDispatchStatusByUUID(@Param("uuid") String uuid, @Param("status") String status);
 
-    @Update("update smb_op.dispatch_list set assign_worker = #{expectWorker}, assign_machine = #{expectMachine}, expect_start_dt = #{expectOnline}, expect_finish_dt = #{expectOffline} where uuid = #{uuid}")
+    @Update("update smb_op.dispatch_list set assign_worker = #{expectWorker}, assign_machine = #{expectMachine}, expect_start_dt = #{expectOnline}, expect_finish_dt = #{expectOffline}, sync_dt = current_timestamp() where uuid = #{uuid}")
     int updateDispatchExpectDetailByUUID(@Param("uuid") String uuid, @Param("expectWorker") String expectWorker, @Param("expectMachine") String expectMachine, @Param("expectOnline") String expectOnline, @Param("expectOffline") String expectOffline);
 
-    @Select("select max(last_report_dt) as last_query_dt from smb_op.dispatch_list where process_step = #{processStep}")
+    @Select("select max(sync_dt) as last_query_dt from smb_op.dispatch_list where process_step = #{processStep}")
     String findLastUpdateTimeByProcess(@Param("processStep") String processStep);
 
     @Select("select * from smb_op.dispatch_list where mfgorder_id = #{mfgorderId} and dispatch_id = #{dispatchId} and process_step = #{processStep} and material_id = #{materialId}")
     OpDispatchOrder findOnlyOpDispatchOrderByDispatchInfo(@Param("mfgorderId") String mfgorderId, @Param("dispatchId") String dispatchId, @Param("processStep") String processStep, @Param("materialId") String materialId);
+
+    @Update("update smb_op.dispatch_list set status = 'Delete', sync_dt = current_timestamp() where mfgorder_id = #{mfgorderId}")
+    int softDeleteDispatchOrderByMfgOrder(@Param("mfgorderId") String mfgorderId);
 
 }

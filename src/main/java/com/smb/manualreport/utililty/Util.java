@@ -46,7 +46,6 @@ public class Util {
                 return new PasswordAuthentication("smartboss3621@gmail.com", "Csie3621");
             }
         });
-//        session.setDebug(true);
         try {
             MimeMessage message = new MimeMessage(session);
             message.setFrom(new InternetAddress(from, "SmartBOSS"));

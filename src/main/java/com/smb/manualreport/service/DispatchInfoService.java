@@ -1,10 +1,8 @@
 package com.smb.manualreport.service;
 
-import com.smb.manualreport.bean.ElementLog;
-import com.smb.manualreport.bean.OpDispatchOrder;
-import com.smb.manualreport.bean.SrcDispatchOrder;
-import com.smb.manualreport.bean.WorkLog;
+import com.smb.manualreport.bean.*;
 import com.smb.manualreport.config.ApiConfig;
+import com.smb.manualreport.config.CustomConfig;
 import com.smb.manualreport.mapper.DispatchListMapper;
 import com.smb.manualreport.mapper.SourceDispatchMapper;
 import com.smb.manualreport.mapper.WorkLogMapper;
@@ -40,9 +38,17 @@ public class DispatchInfoService {
     @Autowired
     private SourceDispatchMapper sourceDispatchMapper;
 
-    public List<OpDispatchOrder> findOpDispatchOrderByStepAndWorkerOrMachine(String step, String worker, String machine){
-        logger.info(">>> Worker = " + worker + " / machine = " + machine + " / process = " + step);
-        return dispatchListMapper.findOpDispatchOrderByStepAndWorkerOrMachine(step, worker, machine);
+    @Autowired
+    private CustomConfig customConfig;
+
+    public List<OpDispatchOrder> findOpDispatchOrderByStepAndWorkerOrMachine(String step, String worker, String userName, String machine){
+        logger.info(">>> find task with: Worker = " + worker + " / machine = " + machine + " / process = " + step);
+        return dispatchListMapper.findOpDispatchOrderByStepAndWorkerOrMachine(step, worker, userName, machine);
+    }
+
+    public List<OpDispatchOrder> findOpDispatchOrderByStepAndWorkerOrMachineWithProcessing(String step, String worker, String machine){
+        logger.info(">>> find task includes processing status with: Worker = " + worker + " / machine = " + machine + " / process = " + step);
+        return dispatchListMapper.findOpDispatchOrderByStepAndWorkerOrMachineWithProcessing(step, worker, machine);
     }
 
     public OpDispatchOrder findOpDispatchOrderByUUID(String uuid){
@@ -54,20 +60,25 @@ public class DispatchInfoService {
         //之後要改成讀檔案或者DB拿到最新Sync時間
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 //        String lastQueryDateStr = sdf.format(new Date());
-        String lastQueryDateStr = dispatchListMapper.findLastUpdateTimeByProcess(step);
-        if (lastQueryDateStr == null || lastQueryDateStr.isEmpty()){
-            logger.info(">>> no last query date for reference");
+        String lastSyncDateStr = dispatchListMapper.findLastUpdateTimeByProcess(step);
+        String lastOrderSyncDateStr = null;
+        if (lastSyncDateStr == null || lastSyncDateStr.isEmpty()){
+            logger.info(">>> no last sync date for reference");
             try {
-                lastQueryDateStr = sdf.format(sdf.parse("2020-01-01"));
-                logger.info(">>> last query date = " + lastQueryDateStr + " and process = " + step);
+                lastSyncDateStr = sdf.format(sdf.parse(customConfig.getSync()));
+                lastOrderSyncDateStr = sdf.format(sdf.parse(customConfig.getOrdersync()));
+                logger.info(">>> Set order sync date = " + lastOrderSyncDateStr);
+                logger.info(">>> Set sync date = " + lastSyncDateStr + " and process = " + step);
             } catch (ParseException e) {
                 e.printStackTrace();
             }
         } else {
-            logger.info(">>> last query date = " + lastQueryDateStr + " and process = " + step);
+            lastOrderSyncDateStr = lastSyncDateStr;
+            logger.info(">>> last order sync date = " + lastOrderSyncDateStr);
+            logger.info(">>> last sync date = " + lastSyncDateStr + " and process = " + step);
         }
 
-        List<SrcDispatchOrder> listSrcDispatchOrder = sourceDispatchMapper.findDispatchOrderByProcessAndTime(Constant.JUJIANG_PROCESS_MAP.get(step), lastQueryDateStr);
+        List<SrcDispatchOrder> listSrcDispatchOrder = sourceDispatchMapper.findDispatchOrderByProcessAndTime(Constant.JUJIANG_PROCESS_MAP.get(step), lastSyncDateStr);
         if(listSrcDispatchOrder == null || listSrcDispatchOrder.size() == 0) {
             logger.info(">>> No dispatch order need to update in smbsource.");
         } else {
@@ -82,22 +93,72 @@ public class DispatchInfoService {
                     if(dp.getMaterialId() == null || dp.getExpectAmount() == null){
                         logger.error(">>> Miss material/count information, cannot insert this dispatch task!!");
                     } else {
-                        //將炬將的製程代碼Mapping回去公版
-//                    if (dp.getProcessStep().equals("MA")) {
-//                        dp.setProcessStep("PRGM");
-//                    } else if (dp.getProcessStep().equals("MB")) {
-//                        dp.setProcessStep("LASR");
-//                    } else if (dp.getProcessStep().equals("MC")) {
-//                        dp.setProcessStep("BEND");
-//                    } else if (dp.getProcessStep().equals("MD")) {
-//                        dp.setProcessStep("WELD");
-//                    }
                         dp.setProcessStep(Constant.JUJIANG_PROCESS_MAP.get(dp.getProcessStep()));
                         dispatchListMapper.insertDispatchList(dp);
                     }
                 }
             }
         }
+
+//        List<ProductOrder> listProductOrder = sourceDispatchMapper.findProductOrderByTime("2020-01-01");
+        List<ProductOrder> listProductOrder = sourceDispatchMapper.findProductOrderByTime(lastOrderSyncDateStr);
+        if(listProductOrder == null || listProductOrder.size() == 0){
+            logger.info(">>> No product order need to update in smbsource.");
+        } else {
+            for(ProductOrder po : listProductOrder){
+                if(po.getRawState().equals(Constant.PO_STATUS_ONGOING)) {
+                    logger.info(">>> PO:" + po.getPoId() + " state = " + po.getRawState() + ", do nothing");
+                } else {
+                    logger.info(">>> PO:" + po.getPoId() + " state = " + po.getRawState() + ", ready to delete dispatch by mfgorderId");
+                    List<String> listMfgorderId = sourceDispatchMapper.findMfgOrderIdByProductOrder(po.getPoId());
+                    for(String mfgorderId : listMfgorderId) {
+                        logger.info(">>> Delete dispatch order by mfgorder - " + mfgorderId);
+                        dispatchListMapper.softDeleteDispatchOrderByMfgOrder(mfgorderId);
+                    }
+                }
+            }
+        }
+
+        //從訂單狀態向下決定誰要sync
+//        List<ProductOrder> listProductOrder = sourceDispatchMapper.findProductOrderByTime(lastSyncDateStr);
+//        if(listProductOrder == null || listProductOrder.size() == 0){
+//            logger.info(">>> No product order need to update in smbsource.");
+//        } else {
+//            for(ProductOrder po : listProductOrder){
+//                if(po.getRawState().equals(Constant.PO_STATUS_ONGOING)) {
+//                    logger.info(">>> PO:" + po.getPoId() + " state = " + Constant.PO_STATUS_ONGOING + ", ready to check dispatch");
+//                    List<SrcDispatchOrder> listSrcDispatchOrder = sourceDispatchMapper.findDispatchOrderByProcessAndOrderAndTime(Constant.JUJIANG_PROCESS_MAP.get(step), po.getPoId(), lastSyncDateStr);
+//                    if (listSrcDispatchOrder == null || listSrcDispatchOrder.size() == 0) {
+//                        logger.info(">>> No dispatch order need to update for [" + po.getPoId() + "] in smbsource.");
+//                    } else {
+//                        for (SrcDispatchOrder dp : listSrcDispatchOrder) {
+//                            logger.info(">>> check dispatch info exists or not: " + dp.getMfgorderId() + "/" + dp.getDispatchId() + "/" + step + "/" + dp.getMaterialId());
+//                            OpDispatchOrder opDispatchOrder = dispatchListMapper.findOnlyOpDispatchOrderByDispatchInfo(dp.getMfgorderId(), dp.getDispatchId(), step, dp.getMaterialId());
+//                            if (opDispatchOrder != null) {
+//                                logger.info(">>> Update dispatch order with uuid = " + opDispatchOrder.getUuid() + ", set the new information!!!");
+//                                dispatchListMapper.updateDispatchExpectDetailByUUID(opDispatchOrder.getUuid(), dp.getExpectWorker(), dp.getExpectMachine(), dp.getExpectOnline(), dp.getExpectOffline());
+//                            } else {
+//                                logger.info(">>> Insert new dispatch order into smp_op table dispatch_list");
+//                                if (dp.getMaterialId() == null || dp.getExpectAmount() == null) {
+//                                    logger.error(">>> Miss material/count information, cannot insert this dispatch task!!");
+//                                } else {
+//                                    dp.setProcessStep(Constant.JUJIANG_PROCESS_MAP.get(dp.getProcessStep()));
+//                                    dispatchListMapper.insertDispatchList(dp);
+//                                }
+//                            }
+//                        }
+//                    }
+//                } else {
+//                    logger.info(">>> PO:" + po.getPoId() + " ready to delete dispatch by mfgorderId");
+//                    List<String> listMfgorderId = sourceDispatchMapper.findMfgOrderIdByProductOrder(po.getPoId());
+//                    for(String mfgorderId : listMfgorderId) {
+//                        logger.info(">>> Delete dispatch order by mfgorder - " + mfgorderId);
+//                        dispatchListMapper.softDeleteDispatchOrderByMfgOrder(mfgorderId);
+//                    }
+//                }
+//            }
+//        }
+
         return 0;
     }
 
@@ -130,10 +191,21 @@ public class DispatchInfoService {
                     opDispatchOrder.setFinishCnt(listWorkLog.get(0).getMaterialCnt());
                 }
             } else if(state == 4){
-                opDispatchOrder.setStatus("Finish");
+                //第一次修正，因為可能會有Exception後再次領走task且正常完成報工
 //                opDispatchOrder.setFinishCnt(listWorkLog.get(0).getMaterialCnt());
-                opDispatchOrder.setFinishCnt(opDispatchOrder.getTotalCnt());
-                opDispatchOrder.setActualFinishDt(listWorkLog.get(0).getCreateDt());
+                //第二次修正，因為永進興每次都只卡1個，所以必須得用數量來判斷是否完成
+//                opDispatchOrder.setStatus("Finish");
+//                opDispatchOrder.setFinishCnt(opDispatchOrder.getTotalCnt());
+//                opDispatchOrder.setActualFinishDt(listWorkLog.get(0).getCreateDt());
+                if(opDispatchOrder.getFinishCnt() != null){
+                    opDispatchOrder.setFinishCnt(opDispatchOrder.getFinishCnt() + listWorkLog.get(0).getMaterialCnt());
+                } else {
+                    opDispatchOrder.setFinishCnt(listWorkLog.get(0).getMaterialCnt());
+                }
+                if(opDispatchOrder.getFinishCnt() >= opDispatchOrder.getTotalCnt()){
+                    opDispatchOrder.setActualFinishDt(listWorkLog.get(0).getCreateDt());
+                    opDispatchOrder.setStatus("Finish");
+                }
             } else {
                 logger.error("!!!Last state is not finish state!!!");
             }

@@ -6,6 +6,7 @@ import com.smb.manualreport.bean.ElementLog;
 import com.smb.manualreport.bean.OpDispatchOrder;
 import com.smb.manualreport.bean.WorkLog;
 import com.smb.manualreport.config.ApiConfig;
+import com.smb.manualreport.config.CustomConfig;
 import com.smb.manualreport.config.ReportConfig;
 import com.smb.manualreport.service.DispatchInfoService;
 import com.smb.manualreport.service.WorkRecordService;
@@ -37,6 +38,9 @@ public class WorkTrackController {
 
     @Autowired
     private ReportConfig reportConfig;
+
+    @Autowired
+    private CustomConfig customConfig;
 
     @RequestMapping(value = "configtest")
     @ResponseBody
@@ -158,7 +162,22 @@ public class WorkTrackController {
         WorkLog wl = workRecordService.findWorkLogByWorker(workerId);
         model.addAttribute("materialId", wl.getMaterialId());
         model.addAttribute("materialCnt", wl.getMaterialCnt());
-        return "jobFinish";
+        if(wl.getDispatchUuid() ==null || wl.getDispatchUuid().isEmpty()){
+            //do nothing
+        } else {
+            model.addAttribute("dispatchUuid", wl.getDispatchUuid());
+        }
+        String returnStr;
+        switch(customConfig.getCode()){
+            case "YJX":
+                returnStr = "jobFinish3";
+                break;
+            case "VIC":
+            default:
+                returnStr = "jobFinish2";
+        }
+        return returnStr;
+//        return "jobFinish2";
     }
 
 }
