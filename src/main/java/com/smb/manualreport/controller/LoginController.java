@@ -63,25 +63,27 @@ public class LoginController {
 
     @RequestMapping("/index")
     public String indexMapping(HttpServletRequest request, Model model){
-        logger.info(">>> Login successful, start to redirect");
+        logger.info(">>> [" + request.getSession().getId() + "] " + request.getSession().getAttribute("userName").toString() + " - Login successful, start to redirect");
         Optional<Object> userArea = Optional.ofNullable(request.getSession().getAttribute("processCode"));
         String processStep = null;
         if (userArea.isPresent()){
             processStep = userArea.get().toString();
         }
 
-        String workerId = request.getSession().getAttribute("nickName").toString();
+        String workerId = request.getSession().getAttribute("userName").toString();
+        logger.info(">>> [" + request.getSession().getId() + "] " + "Get work log to check un-closed work");
         WorkLog wl = workRecordService.findWorkLogByWorker(workerId);
 
 //        logger.info(processStep);
         if(wl == null || wl.getState() == 4 || wl.getState() == 3) {
+            logger.info(">>> [" + request.getSession().getId() + "] " + "No work to continue, redirect to select page");
             if (processStep != null && processStep.equals("WELD")) {
                 return "redirect:/task/elementSelect";
             } else {
                 return "redirect:/task/machineSelect";
             }
         } else {
-            logger.info(">>> Resume previous un-reported work");
+            logger.info(">>> [" + request.getSession().getId() + "] " + "Resume previous un-closed work");
             String target = "/task/workStatus";
             if (wl.getDispatchUuid() != null) {
                 target += "?dispatchUUID=" + wl.getDispatchUuid();

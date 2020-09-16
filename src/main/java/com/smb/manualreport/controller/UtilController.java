@@ -23,7 +23,7 @@ public class UtilController {
     @RequestMapping(value = "/changeSessionLanguage")
     public String changeSessionLanauage(HttpServletRequest request, HttpServletResponse response, String lang){
 
-//        logger.info("Language = " + lang);
+        logger.info(">>> Change language to " + lang);
         if(lang.equals(Constant.LANGUAGE_CHINESE)){
 //            logger.info("Set TW");
             request.getSession().setAttribute(SessionLocaleResolver.LOCALE_SESSION_ATTRIBUTE_NAME, new Locale("zh", "TW"));

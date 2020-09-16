@@ -44,22 +44,23 @@ public class TaskConfirmController {
     @RequestMapping(value = "/findDispatchDetail", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<String> findDispatchDetail(HttpServletRequest request, Model model, String dispatchUUID){
-        logger.info(">>> Using selected dispatch order to retrieve detail information : " + dispatchUUID);
-        OpDispatchOrder selectedDispatchOrder = dispatchInfoService.findOpDispatchOrderByUUID(dispatchUUID);
+        logger.info(">>> [" + request.getSession().getId() + "] " + "Using selected dispatch order to retrieve detail information : " + dispatchUUID);
+        OpDispatchOrder selectedDispatchOrder = dispatchInfoService.findOpDispatchOrderByUUID(dispatchUUID, request.getSession().getId());
         return new ResponseEntity<String>(JSON.toJSONString(selectedDispatchOrder), HttpStatus.OK);
     }
 
     @RequestMapping("/elementSelect")
     public String elementSelect(HttpServletRequest request, Model model, @RequestParam(name="selectMachine", required=false) String selectMachine) {
+        logger.info(">>> [" + request.getSession().getId() + "] " + "List unfinished dispatch order and start to select tasks!");
         Optional<Object> userArea = Optional.ofNullable(request.getSession().getAttribute("processCode"));
         String processStep = null;
         if (userArea.isPresent()){
             processStep = userArea.get().toString();
         }
-        logger.info(">>> Sync dispatch information from smbsource!!");
-        dispatchInfoService.SyncDispatchOrderFromSourceToOP(processStep);
-        String selectWorker = request.getSession().getAttribute("nickName").toString();
-        String userName = request.getSession().getAttribute("userName").toString();
+        logger.info(">>> [" + request.getSession().getId() + "] " + "Sync dispatch information from smbsource!!");
+        dispatchInfoService.SyncDispatchOrderFromSourceToOP(processStep, request.getSession().getId());
+        String selectWorker = request.getSession().getAttribute("userName").toString();
+        String nickName = request.getSession().getAttribute("nickName").toString();
 
         if (!processStep.equals("WELD")) {
             selectWorker = null;
@@ -71,22 +72,22 @@ public class TaskConfirmController {
         }
         //看須不須要指定機台來搜尋派工
         if(customConfig.getMachine() == 1) {
-            logger.info(">>> Must select dispatch list with specific machine");
+            logger.info(">>> [" + request.getSession().getId() + "] " + "Must select dispatch list with specific machine");
             if (request.getSession().getAttribute("machineId") != null) {
                 selectMachine = request.getSession().getAttribute("machineId").toString();
             }
         } else {
             selectMachine = null;
         }
-        logger.info(">>> List unfinished dispatch order and start to select!");
+        logger.info(">>> [" + request.getSession().getId() + "] " + "List unfinished dispatch order and start to select!");
         List<OpDispatchOrder> listOpDispatchOrder;
         switch(customConfig.getCode()){
             case "YJX":
-                listOpDispatchOrder = dispatchInfoService.findOpDispatchOrderByStepAndWorkerOrMachineWithProcessing(processStep, selectWorker, selectMachine);
+                listOpDispatchOrder = dispatchInfoService.findOpDispatchOrderByStepAndWorkerOrMachineWithProcessing(processStep, selectWorker, selectMachine, request.getSession().getId());
                 break;
             case "PMCI":
             default:
-                listOpDispatchOrder = dispatchInfoService.findOpDispatchOrderByStepAndWorkerOrMachine(processStep, selectWorker, userName, selectMachine);
+                listOpDispatchOrder = dispatchInfoService.findOpDispatchOrderByStepAndWorkerOrMachine(processStep, selectWorker, nickName, selectMachine, request.getSession().getId());
         }
         if(request.getSession().getAttribute("localeLang") == null || request.getSession().getAttribute("localeLang").toString().equals(Constant.LANGUAGE_CHINESE)) {
             for (OpDispatchOrder od : listOpDispatchOrder) {
@@ -110,16 +111,16 @@ public class TaskConfirmController {
 
     @RequestMapping("/elementSelectOther")
     public String elementSelectOther(HttpServletRequest request, Model model) {
-        logger.info(">>> List unfinished dispatch order and start to select other tasks!");
+        logger.info(">>> [" + request.getSession().getId() + "] " + "List unfinished dispatch order and start to select other tasks!");
         Optional<Object> userArea = Optional.ofNullable(request.getSession().getAttribute("processCode"));
         String processStep = null;
         if (userArea.isPresent()){
             processStep = userArea.get().toString();
         }
-        logger.info(">>> Sync dispatch information from smbsource!!");
-        dispatchInfoService.SyncDispatchOrderFromSourceToOP(processStep);
-        String selectWorker = request.getSession().getAttribute("nickName").toString();
-        String userName = request.getSession().getAttribute("userName").toString();
+        logger.info(">>> [" + request.getSession().getId() + "] " + "Sync dispatch information from smbsource!!");
+        dispatchInfoService.SyncDispatchOrderFromSourceToOP(processStep, request.getSession().getId());
+        String selectWorker = request.getSession().getAttribute("userName").toString();
+        String nickName = request.getSession().getAttribute("nickName").toString();
         if (!processStep.equals("WELD")) {
             selectWorker = null;
         }
@@ -127,6 +128,7 @@ public class TaskConfirmController {
         String selectMachine = null;
         //看須不須要指定機台來搜尋派工
         if(customConfig.getMachine() == 1) {
+            logger.info(">>> [" + request.getSession().getId() + "] " + "Must select dispatch list with specific machine");
             if (machine.isPresent()) {
                 selectMachine = machine.get().toString();
             }
@@ -134,11 +136,11 @@ public class TaskConfirmController {
         List<OpDispatchOrder> listOpDispatchOrder;
         switch(customConfig.getCode()){
             case "YJX":
-                listOpDispatchOrder = dispatchInfoService.findOpDispatchOrderByStepAndWorkerOrMachineWithProcessing(processStep, selectWorker, selectMachine);
+                listOpDispatchOrder = dispatchInfoService.findOpDispatchOrderByStepAndWorkerOrMachineWithProcessing(processStep, selectWorker, selectMachine, request.getSession().getId());
                 break;
             case "PMCI":
             default:
-                listOpDispatchOrder = dispatchInfoService.findOpDispatchOrderByStepAndWorkerOrMachine(processStep, selectWorker, userName, selectMachine);
+                listOpDispatchOrder = dispatchInfoService.findOpDispatchOrderByStepAndWorkerOrMachine(processStep, selectWorker, nickName, selectMachine, request.getSession().getId());
         }
 //        List<OpDispatchOrder> listOpDispatchOrder = dispatchInfoService.findOpDispatchOrderByStepAndWorkerOrMachine(processStep, selectWorker, selectMachine);
         //把 Status 轉中文
@@ -163,7 +165,7 @@ public class TaskConfirmController {
 
     @RequestMapping("/machineSelect")
     public String machineSelect(HttpServletRequest request, Model model, String processStep){
-        logger.info(">>> Please select machine before you start to confirm task!");
+        logger.info(">>> [" + request.getSession().getId() + "] " + "Please select machine before you start to confirm task!");
         List<MachineInfo> listMachineInfo = machineInfoService.findMachineByProcessStep(processStep);
         model.addAttribute("listMachineInfo", listMachineInfo);
         return "machineSelect2";
@@ -171,6 +173,7 @@ public class TaskConfirmController {
 
     @RequestMapping("/workStatus")
     public String confirmTask(HttpServletRequest request, Model model){
+        logger.info(">>> [" + request.getSession().getId() + "] " + "Select work and redirect to working page");
         String returnStr;
         switch(customConfig.getCode()){
             case "YJX":

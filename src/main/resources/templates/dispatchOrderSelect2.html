@@ -35,6 +35,7 @@
             <!-- <input type="text" class="form-control form-control-sm" aria-controls="dispatch-order-table"> -->
             <!-- <input type="text" id="task-filter" placeholder="請輸入關鍵字" autofocus="autofocus"> -->
             <input type="text" id="task-filter" th:placeholder="#{selectPart_keyword}" autofocus="autofocus">
+            <button id="filter-clear" th:text="#{selectPart_clear}"></button>
         </div>
         <div class="dispatch-order-container">
             <table class="table" id="dispatch-order-table" cellspacing="0" style="width: 100%;">
@@ -166,6 +167,7 @@
         var dt;
         var selectedData;
         var dispatchUUID;
+        var stop;
 
         $(document).ready(function() {
             $('#dispatch-order-table tbody tr').removeClass('selected');
@@ -204,7 +206,29 @@
 
             customizeTableStyle();
 
+            //20200915 炬將會刷子件條碼帶"-"，必須trim掉只取前面，需要透過eventprevent
+            $('#task-filter').on('keypress', function(e){
+                // console.log(e);
+                // console.log(stop);
+                if (e.currentTarget.value.length === 0) {
+                    stop = false;
+                }
+                if (e.key === "-") {
+                    stop = true;
+                }
+                if (stop) {
+                    e.preventDefault();
+                }
+            });
+
             $('#task-filter').on('keyup', function(){
+                // var reg = /[A-Za-z0-9]+-[A-Za-z0-9]*/;
+                // console.log("Before handle: " + this.value);
+                // if (reg.test(this.value)){
+                //     var inputParts = this.value.split('-');                    
+                //     $('#task-filter').val(inputParts[0]);
+                // }
+                // console.log("After handle: " + this.value);         
                 dt.search(this.value).draw();
                 $('#dispatch-order-table tbody tr').removeClass('selected');
                 // console.log(dt.rows({filter:'applied'}).nodes().length);
@@ -220,7 +244,13 @@
                     $('#manual-keyin-btn').attr('disabled', true);
                     $('#select-task-btn').attr('disabled', true);
                 }
-                
+
+            });
+
+            $('#filter-clear').on('click', function(){
+                $('#task-filter').val("");
+                $('#task-filter').focus();
+                dt.search("").draw();
             });
 
         } );

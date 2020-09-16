@@ -10,9 +10,9 @@ import java.util.List;
 public interface WorkLogMapper {
 
     @Insert("insert into smb_op.work_log " +
-            "(worker_id, material_id, material_cnt, create_dt, state, machine_id, process_step, dispatch_uuid)" +
+            "(worker_id, material_id, material_cnt, create_dt, state, machine_id, process_step, dispatch_uuid, work_desc)" +
             "values " +
-            "(#{workLog.workerId}, #{workLog.materialId}, #{workLog.materialCnt}, current_timestamp(), #{workLog.state}, #{workLog.machineId}, #{workLog.processStep}, #{workLog.dispatchUuid})")
+            "(#{workLog.workerId}, #{workLog.materialId}, #{workLog.materialCnt}, current_timestamp(), #{workLog.state}, #{workLog.machineId}, #{workLog.processStep}, #{workLog.dispatchUuid}, #{workLog.workDesc})")
     int insertWorkLog(@Param("workLog") WorkLog workLog);
 
     @Select("<script>"
@@ -26,4 +26,7 @@ public interface WorkLogMapper {
 
     @Select("select worker_id, material_id, machine_id, process_step, material_cnt, state, DATE_FORMAT(create_dt, \"%Y-%m-%d %T\") as create_dt, dispatch_uuid from smb_op.work_log where worker_id = #{workerId} order by create_dt desc")
     List<WorkLog> findWorkLogByWorker(@Param("workerId") String workerId);
+
+    @Select("select * from smb_op.work_log where dispatch_uuid = #{dispatchUuid} and worker_id = #{workerId} order by create_dt desc limit 1")
+    WorkLog findLastWorkLogByDpIdAndWorker(@Param("dispatchUuid") String dispatchUuid, @Param("workerId") String workerId);
 }

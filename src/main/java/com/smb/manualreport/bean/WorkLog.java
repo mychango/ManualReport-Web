@@ -12,6 +12,7 @@ public class WorkLog implements Serializable {
     private Integer state;
     private String createDt;
     private String dispatchUuid;
+    private String workDesc;
 
 //    public WorkLog(String workerId, String machineId, String materialId, String processStep, int materialCnt, int state, String createDt, String dispatchUuid){
 //        this.workerId = workerId;
@@ -23,6 +24,14 @@ public class WorkLog implements Serializable {
 //        this.createDt = createDt;
 //        this.dispatchUuid = dispatchUuid;
 //    }
+
+    public String getWorkDesc() {
+        return workDesc;
+    }
+
+    public void setWorkDesc(String workDesc) {
+        this.workDesc = workDesc;
+    }
 
     public String getDispatchUuid() {
         return dispatchUuid;

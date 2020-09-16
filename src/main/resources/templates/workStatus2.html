@@ -17,6 +17,7 @@
             <p id="top-worker-info" th:if="${session.machineId} == null" th:text="${session.processName} + '/' + ${session.nickName}"></p>
             <p id="top-worker-info" th:if="${session.machineId} != null" th:text="${session.processName} + '/' + ${session.nickName} + '/' + ${session.machineId}"></p>
             <p id="top-worker-info-process" th:text="${session.processCode}" style="display: none;"></p>
+            <p id="top-worker-info-userid" th:text="${session.userName}" style="display: none;"></p>
         </div>
         <div class="top-bar-status">
             <!-- <h2>工作確認</h2> -->
@@ -166,16 +167,19 @@
         function recordWorkLog(detail, state, eDoneCnt){
             var worker, machine = null, material, process, cnt, state, dpUuid = null;
             if (detail != null){
-                if(detail.assignWorker == null){
-                    worker = thisWorker;
-                } else {
-                    worker = detail.assignWorker;
-                }
-                if(detail.assignMachine == null){
-                    machine = thisMachine
-                } else {
-                    machine = detail.assignMachine;
-                }
+                // if(detail.assignWorker == null){
+                //     worker = thisWorker;
+                // } else {
+                //     worker = detail.assignWorker;
+                // }
+                // if(detail.assignMachine == null){
+                //     machine = thisMachine
+                // } else {
+                //     machine = detail.assignMachine;
+                // }
+                //20200915 修正dispatch已被開工後修改assignWorker的Exception
+                worker = thisWorker;
+                machine = thisMachine;
                 material = detail.materialId;
                 process = detail.processStep;
                 cnt = $('#expectCnt').val();
@@ -391,7 +395,8 @@
             var workerInfo = $('#top-worker-info').text().split('/');
             // thisProcess = workerInfo[0];
             thisProcess = $('#top-worker-info-process').text();
-            thisWorker = workerInfo[1];
+            // thisWorker = workerInfo[1];
+            thisWorker = $('#top-worker-info-userid').text();
             if (workerInfo.length == 3){
                 thisMachine = workerInfo[2];
             } else{
@@ -552,7 +557,7 @@
                     //寫reportLog & update dispatch order status
                     reportWorkStats(dispatchUUID, thisWorker, thisMachine, $('#keyinId').val().trim(), thisProcess);
                     //跳到完成頁面
-                    switchToFinishPage(thisWorker);
+                    switchToFinishPage();
                 }
             });
         });
@@ -582,7 +587,7 @@
                     //寫reportLog & update dispatch order status
                     reportWorkStats(dispatchUUID, thisWorker, thisMachine, $('#keyinId').val().trim(), thisProcess);
                     //跳到完成頁面
-                    switchToFinishPage(thisWorker);
+                    switchToFinishPage();
                 }
             });
         });

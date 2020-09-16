@@ -16,12 +16,12 @@ public interface DispatchListMapper {
 
     @Select("<script>"
             + "select * from smb_op.dispatch_list where 1 = 1 "
-            + "<if test='workerId != null'> and (assign_worker = #{workerId} or assign_worker = #{userName}) </if>"
+            + "<if test='workerId != null'> and (assign_worker = #{workerId} or assign_worker = #{nickName}) </if>"
             + "<if test='machineId != null'> and assign_machine = #{machineId} </if>"
             + "and process_step = #{processStep} "
             + "and status not in ('Finish', 'In Process', 'Delete') "
             + "</script>")
-    List<OpDispatchOrder> findOpDispatchOrderByStepAndWorkerOrMachine(@Param("processStep") String processStep, @Param("workerId") String workerId, @Param("userName") String userName, @Param("machineId") String machineId);
+    List<OpDispatchOrder> findOpDispatchOrderByStepAndWorkerOrMachine(@Param("processStep") String processStep, @Param("workerId") String workerId, @Param("nickName") String userName, @Param("machineId") String machineId);
 
     @Select("<script>"
             + "select * from smb_op.dispatch_list where 1 = 1 "
@@ -47,7 +47,9 @@ public interface DispatchListMapper {
     @Update("update smb_op.dispatch_list set status = #{status} where uuid = #{uuid}")
     int updateDispatchStatusByUUID(@Param("uuid") String uuid, @Param("status") String status);
 
-    @Update("update smb_op.dispatch_list set assign_worker = #{expectWorker}, assign_machine = #{expectMachine}, expect_start_dt = #{expectOnline}, expect_finish_dt = #{expectOffline}, sync_dt = current_timestamp() where uuid = #{uuid}")
+//    @Update("update smb_op.dispatch_list set assign_worker = #{expectWorker}, assign_machine = #{expectMachine}, expect_start_dt = #{expectOnline}, expect_finish_dt = #{expectOffline}, sync_dt = current_timestamp() where uuid = #{uuid}")
+    //20200915 新增update判斷條件，修正dispatch已被開工後修改assignWorker的Exception
+    @Update("update smb_op.dispatch_list set status = if(assign_worker <> #{expectWorker} and status <> 'Finish', 'Wait', status), assign_worker = #{expectWorker}, assign_machine = #{expectMachine}, expect_start_dt = #{expectOnline}, expect_finish_dt = #{expectOffline}, sync_dt = current_timestamp() where uuid = #{uuid}")
     int updateDispatchExpectDetailByUUID(@Param("uuid") String uuid, @Param("expectWorker") String expectWorker, @Param("expectMachine") String expectMachine, @Param("expectOnline") String expectOnline, @Param("expectOffline") String expectOffline);
 
     @Select("select max(sync_dt) as last_query_dt from smb_op.dispatch_list where process_step = #{processStep}")
@@ -58,5 +60,8 @@ public interface DispatchListMapper {
 
     @Update("update smb_op.dispatch_list set status = 'Delete', sync_dt = current_timestamp() where mfgorder_id = #{mfgorderId}")
     int softDeleteDispatchOrderByMfgOrder(@Param("mfgorderId") String mfgorderId);
+
+    @Select("select assign_worker from smb_op.dispatch_list where uuid = #{uuid}")
+    String findAssignWorkerByUUID(@Param("uuid") String uuid);
 
 }

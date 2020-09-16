@@ -41,57 +41,73 @@ public class DispatchInfoService {
     @Autowired
     private CustomConfig customConfig;
 
-    public List<OpDispatchOrder> findOpDispatchOrderByStepAndWorkerOrMachine(String step, String worker, String userName, String machine){
-        logger.info(">>> find task with: Worker = " + worker + " / machine = " + machine + " / process = " + step);
-        return dispatchListMapper.findOpDispatchOrderByStepAndWorkerOrMachine(step, worker, userName, machine);
+    public List<OpDispatchOrder> findOpDispatchOrderByStepAndWorkerOrMachine(String step, String worker, String nickName, String machine, String sessionId){
+        logger.info(">>> [" + sessionId + "] " + "find task with: Worker = " + worker + " / machine = " + machine + " / process = " + step);
+        return dispatchListMapper.findOpDispatchOrderByStepAndWorkerOrMachine(step, worker, nickName, machine);
     }
 
-    public List<OpDispatchOrder> findOpDispatchOrderByStepAndWorkerOrMachineWithProcessing(String step, String worker, String machine){
-        logger.info(">>> find task includes processing status with: Worker = " + worker + " / machine = " + machine + " / process = " + step);
+    public List<OpDispatchOrder> findOpDispatchOrderByStepAndWorkerOrMachineWithProcessing(String step, String worker, String machine, String sessionId){
+        logger.info(">>> [" + sessionId + "] " + "find task includes processing status with: Worker = " + worker + " / machine = " + machine + " / process = " + step);
         return dispatchListMapper.findOpDispatchOrderByStepAndWorkerOrMachineWithProcessing(step, worker, machine);
     }
 
-    public OpDispatchOrder findOpDispatchOrderByUUID(String uuid){
+    public OpDispatchOrder findOpDispatchOrderByUUID(String uuid, String sessionId){
+        logger.info(">>> [" + sessionId + "] " + "find dispatch task with uuid = " + uuid);
         return dispatchListMapper.findOpDispatchOrderByUUID(uuid);
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public int SyncDispatchOrderFromSourceToOP(String step){
+    public int SyncDispatchOrderFromSourceToOP(String step, String sessionId){
+        logger.info(">>> [" + sessionId + "] " + "Start to sync dispatch detail from smbsource");
         //之後要改成讀檔案或者DB拿到最新Sync時間
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 //        String lastQueryDateStr = sdf.format(new Date());
         String lastSyncDateStr = dispatchListMapper.findLastUpdateTimeByProcess(step);
         String lastOrderSyncDateStr = null;
         if (lastSyncDateStr == null || lastSyncDateStr.isEmpty()){
-            logger.info(">>> no last sync date for reference");
+            logger.info(">>> [" + sessionId + "] " + "No last sync date for reference");
             try {
                 lastSyncDateStr = sdf.format(sdf.parse(customConfig.getSync()));
                 lastOrderSyncDateStr = sdf.format(sdf.parse(customConfig.getOrdersync()));
-                logger.info(">>> Set order sync date = " + lastOrderSyncDateStr);
-                logger.info(">>> Set sync date = " + lastSyncDateStr + " and process = " + step);
+                logger.info(">>> [" + sessionId + "] " + "Set order sync date from config = " + lastOrderSyncDateStr);
+                logger.info(">>> [" + sessionId + "] " + "Set sync date from config = " + lastSyncDateStr + " and process = " + step);
             } catch (ParseException e) {
                 e.printStackTrace();
             }
         } else {
             lastOrderSyncDateStr = lastSyncDateStr;
-            logger.info(">>> last order sync date = " + lastOrderSyncDateStr);
-            logger.info(">>> last sync date = " + lastSyncDateStr + " and process = " + step);
+            logger.info(">>> [" + sessionId + "] " + "last order sync date = " + lastOrderSyncDateStr);
+            logger.info(">>> [" + sessionId + "] " + "last sync date = " + lastSyncDateStr + " and process = " + step);
         }
 
+        // 炬將專屬 Process Mapping
         List<SrcDispatchOrder> listSrcDispatchOrder = sourceDispatchMapper.findDispatchOrderByProcessAndTime(Constant.JUJIANG_PROCESS_MAP.get(step), lastSyncDateStr);
         if(listSrcDispatchOrder == null || listSrcDispatchOrder.size() == 0) {
-            logger.info(">>> No dispatch order need to update in smbsource.");
+            logger.info(">>> [" + sessionId + "] " + "No dispatch order need to update in smbsource.");
         } else {
             for(SrcDispatchOrder dp : listSrcDispatchOrder){
-                logger.info(">>> check dispatch info exists or not: " + dp.getMfgorderId() + "/" + dp.getDispatchId() + "/" + dp.getProcessStep());
+                logger.info(">>> [" + sessionId + "] " + "Check dispatch info exists or not: " + dp.getMfgorderId() + "/" + dp.getDispatchId() + "/" + dp.getProcessStep());
                 OpDispatchOrder opDispatchOrder = dispatchListMapper.findOnlyOpDispatchOrderByDispatchInfo(dp.getMfgorderId(), dp.getDispatchId(), step, dp.getMaterialId());
                 if(opDispatchOrder != null){
-                    logger.info(">>> Update dispatch order with uuid = " + opDispatchOrder.getUuid() + ", set the new information!!!");
+                    logger.info(">>> [" + sessionId + "] " + "Update dispatch order with uuid = " + opDispatchOrder.getUuid() + ", set the new information!!!");
+                    //20200915 取出原本的指定工人，修正dispatch已被開工後修改assignWorker的Exception
+                    String beforeWorker = dispatchListMapper.findAssignWorkerByUUID(opDispatchOrder.getUuid());
                     dispatchListMapper.updateDispatchExpectDetailByUUID(opDispatchOrder.getUuid(), dp.getExpectWorker(), dp.getExpectMachine(), dp.getExpectOnline(), dp.getExpectOffline());
+                    //20200915 判斷是否有已開工的記錄並insert一筆異常完工，修正dispatch已被開工後修改assignWorker的Exception
+                    if(beforeWorker != null && !beforeWorker.equals(dp.getExpectWorker())){
+                        logger.warn(">>> [" + sessionId + "] " + "Discovcer the dispatch worker has been changed from " + beforeWorker + " to " + dp.getExpectWorker());
+                        WorkLog wl = workLogMapper.findLastWorkLogByDpIdAndWorker(opDispatchOrder.getUuid(), beforeWorker);
+                        if(wl != null && wl.getState() != 3 && wl.getState() != 4){
+                            logger.warn(">>> [" + sessionId + "] " + "Discovcer the dispatch task has been fetched but also assigned to other worker, need fix");
+                            wl.setState(3);
+                            wl.setWorkDesc("人員切換，強制結束");
+                            workLogMapper.insertWorkLog(wl);
+                        }
+                    }
                 } else {
-                    logger.info(">>> Insert new dispatch order into smp_op table dispatch_list");
+                    logger.info(">>> [" + sessionId + "] " + "Insert new dispatch order into smp_op table dispatch_list");
                     if(dp.getMaterialId() == null || dp.getExpectAmount() == null){
-                        logger.error(">>> Miss material/count information, cannot insert this dispatch task!!");
+                        logger.error(">>> [" + sessionId + "] " + "Miss material/count information, cannot insert this dispatch task!!");
                     } else {
                         dp.setProcessStep(Constant.JUJIANG_PROCESS_MAP.get(dp.getProcessStep()));
                         dispatchListMapper.insertDispatchList(dp);
@@ -103,13 +119,13 @@ public class DispatchInfoService {
 //        List<ProductOrder> listProductOrder = sourceDispatchMapper.findProductOrderByTime("2020-01-01");
         List<ProductOrder> listProductOrder = sourceDispatchMapper.findProductOrderByTime(lastOrderSyncDateStr);
         if(listProductOrder == null || listProductOrder.size() == 0){
-            logger.info(">>> No product order need to update in smbsource.");
+            logger.info(">>> [" + sessionId + "] " + "No product order need to update in smbsource.");
         } else {
             for(ProductOrder po : listProductOrder){
                 if(po.getRawState().equals(Constant.PO_STATUS_ONGOING)) {
-                    logger.info(">>> PO:" + po.getPoId() + " state = " + po.getRawState() + ", do nothing");
+                    logger.info(">>> [" + sessionId + "] " + "PO:" + po.getPoId() + " state = " + po.getRawState() + ", do nothing");
                 } else {
-                    logger.info(">>> PO:" + po.getPoId() + " state = " + po.getRawState() + ", ready to delete dispatch by mfgorderId");
+                    logger.info(">>> [" + sessionId + "] " + "PO:" + po.getPoId() + " state = " + po.getRawState() + ", ready to delete dispatch by mfgorderId");
                     List<String> listMfgorderId = sourceDispatchMapper.findMfgOrderIdByProductOrder(po.getPoId());
                     for(String mfgorderId : listMfgorderId) {
                         logger.info(">>> Delete dispatch order by mfgorder - " + mfgorderId);
@@ -163,16 +179,18 @@ public class DispatchInfoService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public int updateDispatchStatusByUUID(String dispatchUUID, String status){
+    public int updateDispatchStatusByUUID(String dispatchUUID, String status, String sessionId){
+        logger.info(">>> [" + sessionId + "] " + "Update dispatch task status = " + status + " with dispatch UUID = " + dispatchUUID);
         return dispatchListMapper.updateDispatchStatusByUUID(dispatchUUID, status);
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public int updateDispatchOrderByReportStats(String dispatchUUID, String workerId, String machineId, String materialId, String processStep) {
+    public int updateDispatchOrderByReportStats(String dispatchUUID, String workerId, String machineId, String materialId, String processStep, String sessionId) {
         if(dispatchUUID == null || dispatchUUID.isEmpty()){
-            logger.info(">>> Manual key-in, no dispatch order to update status");
+            logger.info(">>> [" + sessionId + "] " + "Manual key-in, no dispatch order to update status");
             return 0;
         }
+        logger.info(">>> [" + sessionId + "] " + "Start to update dispatch order");
         if(machineId == null || machineId.isEmpty()) {
             machineId = null;
         }
@@ -180,7 +198,7 @@ public class DispatchInfoService {
         OpDispatchOrder opDispatchOrder = dispatchListMapper.findOpDispatchOrderByUUID(dispatchUUID);
         List<WorkLog> listWorkLog = workLogMapper.findWorkLogByWorkerAndMachineAndMaterial(workerId, machineId, materialId);
         if (listWorkLog.size() == 0) {
-            logger.error("!!!No work log, please check program!!!");
+            logger.error(">>> [" + sessionId + "] " + "!!!No work log, please check program!!!");
         } else {
             int state = listWorkLog.get(0).getState();
             if(state == 3){
@@ -207,9 +225,10 @@ public class DispatchInfoService {
                     opDispatchOrder.setStatus("Finish");
                 }
             } else {
-                logger.error("!!!Last state is not finish state!!!");
+                logger.error(">>> [" + sessionId + "] " + "!!!Last state is not finish state!!!");
             }
         }
+        logger.info(">>> [" + sessionId + "] " + "Finish to update dispatch order for dispatch UUID = " + dispatchUUID + " with status = " + opDispatchOrder.getStatus());
         return dispatchListMapper.updateDispatchStatusAndCountByUUID(dispatchUUID, opDispatchOrder);
     }
 }

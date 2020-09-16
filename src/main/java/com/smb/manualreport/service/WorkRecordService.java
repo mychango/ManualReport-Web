@@ -46,7 +46,8 @@ public class WorkRecordService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public int insertWorkLog(String workerId, String machineId, String materialId, String processStep, int materialCnt, int state, String dispatchUUID){
+    public int insertWorkLog(String workerId, String machineId, String materialId, String processStep, int materialCnt, int state, String dispatchUUID, String sessionId){
+        logger.info(">>> [" + sessionId + "] " + "Start to insert work log with detail = " + workerId + " / " + machineId + " / " + materialId + " / " + processStep + " / " + materialCnt + " / " + state + " / " + dispatchUUID);
         if (machineId.isEmpty()){
             machineId = null;
         }
@@ -61,11 +62,13 @@ public class WorkRecordService {
         wl.setMaterialCnt(materialCnt);
         wl.setState(state);
         wl.setDispatchUuid(dispatchUUID);
+        wl.setWorkDesc(null);
         return workLogMapper.insertWorkLog(wl);
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE, rollbackFor = Exception.class)
-    public int insertRecordLog(String dispatchUUID, String workerId, String machineId, String materialId, String processStep, int reportControl, String reportNotify){
+    public int insertRecordLog(String dispatchUUID, String workerId, String machineId, String materialId, String processStep, int reportControl, String reportNotify, String sessionId) {
+        logger.info(">>> [" + sessionId + "] " + "Start to insert record log with detail = " + workerId + " / " + machineId + " / " + dispatchUUID + " / " + materialId);
         if(machineId == null || machineId.isEmpty()) {
             machineId = null;
         }
@@ -85,19 +88,17 @@ public class WorkRecordService {
         rl.setProcessStep(processStep);
         rl.setMaterialId(materialId);
 
-        logger.info(workerId + " / " + machineId + " / " + materialId);
-
         List<WorkLog> listWorkLog = workLogMapper.findWorkLogByWorkerAndMachineAndMaterial(workerId, machineId, materialId);
         if (listWorkLog.size() == 0) {
-            logger.error("!!! No work log, please check program!!!");
+            logger.error(">>> [" + sessionId + "] " + "!!! No work log, please check program!!!");
         } else {
             for(WorkLog wl : listWorkLog){
                 if (wl.getState() == 4 || wl.getState() == 3){
-                    logger.info(">>> Set complete info with state = " + wl.getState());
+                    logger.info(">>> [" + sessionId + "] " + "Set complete info with state = " + wl.getState());
                     rl.setFinishDt(wl.getCreateDt());
                     rl.setFinishCnt(wl.getMaterialCnt());
                 } else if(wl.getState() == 1){
-                    logger.info(">>> Set start info with state = 1");
+                    logger.info(">>> [" + sessionId + "] " + "Set start info with state = 1");
                     rl.setStartDt(wl.getCreateDt());
                     rl.setTotalCnt(wl.getMaterialCnt());
                     //抓到這一次工作的源頭，跳出資料
@@ -116,34 +117,21 @@ public class WorkRecordService {
         el.setFinish_number(rl.getFinishCnt());
         el.setStart_datetime(rl.getStartDt());
         el.setFinish_datetime(rl.getFinishDt());
-        // 炬將客製化，需改成統一版本
-//        switch(rl.getProcessStep()){
-//            case "LASR":
-//                el.setStep_code("MB");
-//                break;
-//            case "BEND":
-//                el.setStep_code("MC");
-//                break;
-//            case "WELD":
-//                el.setStep_code("MD");
-//                break;
-//            default:
-//                //do nothing
-//        }
+
         el.setStep_code(Constant.JUJIANG_PROCESS_MAP.get(rl.getProcessStep()));
         el.setFaile_number(rl.getLeftCnt());
         // 有開才打到SmartBOSS去
         if(reportControl == 1) {
-            logger.info(">>> Report ON: Start call smartboss api - newElement");
+            logger.info(">>> [" + sessionId + "] " + "Report ON: Start call smartboss api - newElement");
             try {
                 Util.reportToSmartboss(JSON.toJSONString(el), apiUrl);
             } catch (Exception e) {
                 e.printStackTrace();
-                logger.error("!!!!! Please fix the miss report record !!!!!");
+                logger.error(">>> [" + sessionId + "] " + "!!!!! Please fix the miss report record !!!!!");
                 Util.mailReportFailAlarm(reportNotify, el);
             }
         } else {
-            logger.info(">>> Report OFF: Bypass call smartboss api - newElement");
+            logger.info(">>> [" + sessionId + "] " + "Report OFF: Bypass call smartboss api - newElement");
         }
 
         return reportLogMapper.insertReportLog(rl);
