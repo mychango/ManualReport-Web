@@ -19,14 +19,14 @@ public class Constant {
     public static final HashMap<String, String> PROCESS_MAP_LANGUAGE_MAP;
     static{
         PROCESS_MAP_LANGUAGE_MAP = new HashMap<String, String>();
-        PROCESS_MAP_LANGUAGE_MAP.put("PRGM", "排版");
+        PROCESS_MAP_LANGUAGE_MAP.put("NEST", "排版");
         PROCESS_MAP_LANGUAGE_MAP.put("LASR", "雷射");
         PROCESS_MAP_LANGUAGE_MAP.put("BEND", "折床");
         PROCESS_MAP_LANGUAGE_MAP.put("WELD", "焊接");
         PROCESS_MAP_LANGUAGE_MAP.put("SHER", "剪床");
         PROCESS_MAP_LANGUAGE_MAP.put("VCUT", "刨溝");
         PROCESS_MAP_LANGUAGE_MAP.put("PNCH", "沖孔");
-        PROCESS_MAP_LANGUAGE_MAP.put("排版", "PRGM");
+        PROCESS_MAP_LANGUAGE_MAP.put("排版", "NEST");
         PROCESS_MAP_LANGUAGE_MAP.put("雷射", "LASR");
         PROCESS_MAP_LANGUAGE_MAP.put("折床", "BEND");
         PROCESS_MAP_LANGUAGE_MAP.put("焊接", "WELD");

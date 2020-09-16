@@ -10,6 +10,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.servlet.http.HttpServletRequest;
+
 @Controller
 public class SyncController {
 
@@ -22,10 +24,10 @@ public class SyncController {
 //    @Scheduled(cron = "0 0 8,10,12,14,16 * * *")
     @RequestMapping("/tool/syncOrderTest")
     @ResponseBody
-    public ResponseEntity<String> syncDispatchOrder(){
+    public ResponseEntity<String> syncDispatchOrder(HttpServletRequest request){
         logger.info(">>> Start to sync dispatch order from smbsource.");
         for(String s : Constant.JUJIANG_PROCESS_STEP){
-            dispatchInfoService.SyncDispatchOrderFromSourceToOP(s);
+            dispatchInfoService.SyncDispatchOrderFromSourceToOP(s, request.getSession().getId());
         }
         return ResponseEntity.ok("Sync Done");
     }

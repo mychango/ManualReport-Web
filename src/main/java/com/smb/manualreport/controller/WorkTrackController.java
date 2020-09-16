@@ -91,9 +91,9 @@ public class WorkTrackController {
     @RequestMapping(value = "/getCurrentWorkState")
     @ResponseBody
     public ResponseEntity<String> getCurrentWorkState(HttpServletRequest request, Model model){
-        logger.info(">>> Start to get current work status");
+        logger.info(">>> [" + request.getSession().getId() + "] " + "Start to get current work status");
 
-        String workerId = request.getSession().getAttribute("nickName").toString();
+        String workerId = request.getSession().getAttribute("userName").toString();
         WorkLog wl = workRecordService.findWorkLogByWorker(workerId);
 
         return new ResponseEntity<String>(JSON.toJSONString(wl), HttpStatus.OK);
@@ -103,14 +103,15 @@ public class WorkTrackController {
     @ResponseBody
     public ResponseEntity<String> insertWorkLog(HttpServletRequest request, Model model, String workerId, String machineId, String materialId, String processStep, Integer materialCnt, Integer state, String dispatchUUID){
 
-        logger.info(">>> Start to insert work log with detail = " + workerId + " / " + machineId + " / " + materialId + " / " + processStep + " / " + materialCnt + " / " + state + " / " + dispatchUUID);
+        logger.info(">>> [" + request.getSession().getId() + "] " + "Receive action, start to insert work");
 
         ApiReturn ar = new ApiReturn();
         try {
-            workRecordService.insertWorkLog(workerId, machineId, materialId, processStep, materialCnt, state, dispatchUUID);
+            workRecordService.insertWorkLog(workerId, machineId, materialId, processStep, materialCnt, state, dispatchUUID, request.getSession().getId());
             ar.setRetMessage("");
             ar.setRetStatus("Success");
         } catch (Exception e) {
+            logger.error(">>> [" + request.getSession().getId() + "] " + e.getMessage());
             e.printStackTrace();
             ar.setRetMessage(e.getMessage());
             ar.setRetStatus("Exception");
@@ -121,14 +122,15 @@ public class WorkTrackController {
     @RequestMapping(value = "/updateDispatchStatus")
     @ResponseBody
     public ResponseEntity<String> updateDispatchStatus(HttpServletRequest request, Model model, String dispatchUUID, String status){
-        logger.info(">>> Update dispatch status = " + status);
+        logger.info(">>> [" + request.getSession().getId() + "] " + "Update dispatch status = " + status + " with dispatch UUID = " + dispatchUUID);
 
         ApiReturn ar = new ApiReturn();
         try {
-            dispatchInfoService.updateDispatchStatusByUUID(dispatchUUID, status);
+            dispatchInfoService.updateDispatchStatusByUUID(dispatchUUID, status, request.getSession().getId());
             ar.setRetMessage("");
             ar.setRetStatus("Success");
         } catch (Exception e) {
+            logger.error(">>> [" + request.getSession().getId() + "] " + e.getMessage());
             e.printStackTrace();
             ar.setRetMessage(e.getMessage());
             ar.setRetStatus("Exception");
@@ -140,16 +142,17 @@ public class WorkTrackController {
     @ResponseBody
     public ResponseEntity<String> reportWorkStats(HttpServletRequest request, Model model, String dispatchUUID, String workerId, String machineId, String materialId, String processStep){
 
-        logger.info(">>> Start to report work stats, including [insert report log] and [update dispatch order status]");
+        logger.info(">>> [" + request.getSession().getId() + "] " + "Start to report work stats, including [insert report log] and [update dispatch order status]");
 
         ApiReturn ar = new ApiReturn();
         try {
-            workRecordService.insertRecordLog(dispatchUUID, workerId, machineId, materialId, processStep, reportConfig.getControl(), reportConfig.getRecipient());
-            dispatchInfoService.updateDispatchOrderByReportStats(dispatchUUID, workerId, machineId, materialId, processStep);
+            workRecordService.insertRecordLog(dispatchUUID, workerId, machineId, materialId, processStep, reportConfig.getControl(), reportConfig.getRecipient(), request.getSession().getId());
+            dispatchInfoService.updateDispatchOrderByReportStats(dispatchUUID, workerId, machineId, materialId, processStep, request.getSession().getId());
             ar.setRetMessage("");
             ar.setRetStatus("Success");
         } catch (Exception e) {
             e.printStackTrace();
+            logger.error(">>> [" + request.getSession().getId() + "] " + e.getMessage());
             ar.setRetMessage(e.getMessage());
             ar.setRetStatus("Exception");
         }
@@ -158,7 +161,8 @@ public class WorkTrackController {
 
     @RequestMapping("/jobFinish")
     public String jobFinish(HttpServletRequest request, Model model){
-        String workerId = request.getSession().getAttribute("nickName").toString();
+        logger.info(">>> [" + request.getSession().getId() + "] " + "Job done and direct to finish page");
+        String workerId = request.getSession().getAttribute("userName").toString();
         WorkLog wl = workRecordService.findWorkLogByWorker(workerId);
         model.addAttribute("materialId", wl.getMaterialId());
         model.addAttribute("materialCnt", wl.getMaterialCnt());
