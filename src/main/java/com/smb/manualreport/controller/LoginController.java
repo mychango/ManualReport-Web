@@ -42,7 +42,7 @@ public class LoginController {
     private CustomConfig customConfig;
 
     @RequestMapping("/")
-    public String onluUrl(HttpServletRequest request, Model model) {
+    public String onlyUrl(HttpServletRequest request, Model model) {
         return "redirect:/index";
     }
 
@@ -74,7 +74,6 @@ public class LoginController {
         logger.info(">>> [" + request.getSession().getId() + "] " + "Get work log to check un-closed work");
         WorkLog wl = workRecordService.findWorkLogByWorker(workerId);
 
-//        logger.info(processStep);
         if(wl == null || wl.getState() == 4 || wl.getState() == 3) {
             logger.info(">>> [" + request.getSession().getId() + "] " + "No work to continue, redirect to select page");
             if (processStep != null && processStep.equals("WELD")) {

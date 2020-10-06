@@ -25,13 +25,10 @@ public class UtilController {
 
         logger.info(">>> Change language to " + lang);
         if(lang.equals(Constant.LANGUAGE_CHINESE)){
-//            logger.info("Set TW");
             request.getSession().setAttribute(SessionLocaleResolver.LOCALE_SESSION_ATTRIBUTE_NAME, new Locale("zh", "TW"));
         } else if(lang.equals(Constant.LANGUAGE_ENGLISH)){
-//            logger.info("Set EN");
             request.getSession().setAttribute(SessionLocaleResolver.LOCALE_SESSION_ATTRIBUTE_NAME, new Locale("en", "US"));
         } else if(lang.equals(Constant.LANGUAGE_VIETNAMESE)){
-//            logger.info("Set VN");
             request.getSession().setAttribute(SessionLocaleResolver.LOCALE_SESSION_ATTRIBUTE_NAME, new Locale("vi", "VN"));
         }
 

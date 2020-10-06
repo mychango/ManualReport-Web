@@ -57,7 +57,7 @@
                         <!-- <th class="table-col-name">工單狀態</th> -->
                         <th class="table-col-name" th:text="#{dt_status}"></th>
                         <!-- <th class="table-col-name last-col">預計完成時間</th> -->
-                        <th class="table-col-name" th:text="#{dt_expectOffline}"></th>
+                        <th class="table-col-name last-col" th:text="#{dt_expectOffline}"></th>
                         <th style="display: none;">UUID</th>
                     </tr>
                 </thead>
@@ -188,11 +188,14 @@
                     className: 'select-checkbox',
                     targets: 0
                 }],
-                select: true
+                select: true,
                 // select: {
                 //     style:    'os',
                 //     selector: 'td:first-child'
                 // }
+                "drawCallback" : function( settings ) {
+                    customizeTableStyle();
+                }
             });
 
             dt.on('select', function(e, tb, type, indexes){
@@ -204,7 +207,7 @@
             });
             
 
-            customizeTableStyle();
+            // customizeTableStyle();
 
             //20200915 炬將會刷子件條碼帶"-"，必須trim掉只取前面，需要透過eventprevent
             $('#task-filter').on('keypress', function(e){
@@ -233,7 +236,10 @@
                 $('#dispatch-order-table tbody tr').removeClass('selected');
                 // console.log(dt.rows({filter:'applied'}).nodes().length);
                 // console.log(dt.rows({filter:'applied'}).data());
-                if(dt.rows({filter:'applied'}).nodes().length == 1){
+                if($(this).val().length == 0){
+                    $('#manual-keyin-btn').attr('disabled', true);
+                    $('#select-task-btn').attr('disabled', true);
+                } else if(dt.rows({filter:'applied'}).nodes().length == 1){
                     dt.row({filter:'applied'}).select();
                     $('#manual-keyin-btn').attr('disabled', true);
                     $('#select-task-btn').attr('disabled', false);
@@ -251,6 +257,9 @@
                 $('#task-filter').val("");
                 $('#task-filter').focus();
                 dt.search("").draw();
+                $('#dispatch-order-table tbody tr').removeClass('selected');
+                $('#manual-keyin-btn').attr('disabled', true);
+                $('#select-task-btn').attr('disabled', true);
             });
 
         } );

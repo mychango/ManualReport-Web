@@ -57,6 +57,7 @@ public class MRSWebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/login").permitAll()
                 .antMatchers("/util/changeSessionLanguage").permitAll()
                 .antMatchers("/working/configtest").permitAll()
+                .antMatchers("/tool/preSyncDispatch").permitAll()
                 .anyRequest().authenticated()
 //                .anyRequest().permitAll()
                 .and()

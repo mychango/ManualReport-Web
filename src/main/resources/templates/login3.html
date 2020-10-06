@@ -4,239 +4,70 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>報工系統</title>
+    <link th:href="@{/assets/css/login3_computer.css}" rel="stylesheet" media="only screen and (min-width: 1367px)">
+    <!-- iPad Pro -->
+    <!-- <link th:href="@{/assets/css/login_pad.css}" rel="stylesheet" media="only screen and (min-width: 1024px) and (max-width: 1366px)"> -->
+    <link th:href="@{/assets/css/login3_pad.css}" rel="stylesheet" media="only screen and (max-width: 1366px)">
 </head>
-<style>
-    html, body, div, span, applet, object, iframe,
-    h1, h2, h3, h4, h5, h6, p, blockquote, pre,
-    a, abbr, acronym, address, big, cite, code,
-    del, dfn, em, img, ins, kbd, q, s, samp,
-    small, strike, strong, sub, sup, tt, var,
-    b, u, i, center,
-    dl, dt, dd, ol, ul, li,
-    fieldset, form, label, legend,
-    table, caption, tbody, tfoot, thead, tr, th, td,
-    article, aside, canvas, details, embed, 
-    figure, figcaption, footer, header, hgroup, 
-    menu, nav, output, ruby, section, summary,
-    time, mark, audio, video {
-        margin: 0;
-        padding: 0;
-        border: 0;
-        font-size: 100%;
-        font: inherit;
-        vertical-align: baseline;
-    }
-    article, aside, details, figcaption, figure, 
-    footer, header, hgroup, menu, nav, section {
-        display: block;
-    }
-    body {
-        background-color: #EBEBEB;
-        /* width: 100%; */
-        background-size: cover;
-    }
-    ol, ul {
-        list-style: none;
-    }
-    blockquote, q {
-        quotes: none;
-    }
-    blockquote:before, blockquote:after,
-    q:before, q:after {
-        content: '';
-        content: none;
-    }
-    table {
-        border-collapse: collapse;
-        border-spacing: 0;
-    }
-    body {
-        font-family: Microsoft JhengHei;
-    }
-
-    ::placeholder {
-        color: #d6d6d6;
-    }
-
-    .top-bar-container {
-        background-color: #1C1F4C;
-        width: 100%;
-        height: 75px;
-        color: #ffffff;
-    }
-
-    /* .mainframe-container {
-        background-color: #EBEBEB;
-        width: 100%;
-        background-size: cover;
-    } */
-
-    .top-bar-container .top-bar-title {
-        font-size: 40px;
-        font-weight: bold;
-        text-align: center;
-        line-height: 75px;
-    }
-
-    .mainframe-container {
-        padding-top: 80px;
-        padding-bottom: 30px;
-    }
-
-    .language-select-container {
-        display: flex;
-        justify-content: center;
-        margin-top: 20px;
-        margin-bottom: 30px;
-    }
-
-    .language-select-container button{
-        font-family: Microsoft JhengHei;
-        font-size: 24px;
-        background-color: #1C1F4C;
-        color: #ffffff;
-        border: none;
-        border-radius: 30px;
-        outline:none;
-        width: 170px;
-        height: 42px;
-        margin: 0 10px;
-    }
-
-    .language-select-container button:hover {
-        background-color: rgba(28, 31, 76, 0.8);
-    }
-
-    .language-select-container button:active {
-        background-color: rgba(28, 31, 76, 0.6);
-    }
-
-    .input-title {
-        text-align: center;
-        line-height: 60px;
-        padding-bottom: 10px;
-        font-size: 36px;
-        font-weight: bold;
-    }
-
-    .login-form {
-        display: block;
-        margin: 0 auto;
-    }
-
-    /* .input-group {
-        display: flex;
-        justify-content: center;
-    } */
-
-    .login-form input {
-        border: 2px solid #d6d6d6;
-        border-radius: 6px;
-        width: 370px;
-        padding: 10px 6px;
-        font-family: Microsoft JhengHei;
-        font-size: 30px;
-        margin: 0 auto;   
-        outline:none;
-        /* transition: width 0.4s ease-in-out; */
-        
-    }
-
-    .login-form input:focus {
-        /* border: 2px solid #555555; */
-        /* border-radius: 6px; */
-        /* width: 300px; */
-        background-color: rgb(255, 242, 242);
-    }
-
-    .login-action {
-        display: flex;
-        justify-content: center;
-    }
-
-    .login-action button {
-        font-family: Microsoft JhengHei;
-        font-size: 40px;
-        width: 136px;
-        height: 99px;
-        background-color: #1C1F4C;
-        color: #ffffff;
-        border: none;
-        border-radius: 20px;
-        outline:none;        
-        margin-top: 60px;
-        margin-left: 10px;
-        margin-right: 10px;
-    }
-
-    .login-action button:hover {
-        background-color: rgba(28, 31, 76, 0.8);
-    }
-
-    .login-action button:active {
-        background-color: rgba(28, 31, 76, 0.6);
-    }
-
-    .error-msg {
-        padding-top: 10px;
-        text-align: center;
-        color: red;
-        font-size: 20px;
-    }
-
-</style>
 <body>
     <div class="top-bar-container">
-        <h3 class="top-bar-title">手動報工系統</h3>
+        <!-- <h3 class="top-bar-title">手動報工系統</h3> -->
+        <h3 class="top-bar-title" th:text="#{login_title}"></h3>
     </div>
     <div class="mainframe-container">
-        <h3 class="input-title">操作人員</h3>
+        <!-- <h3 class="input-title">操作人員</h3> -->
+        <h3 class="input-title" th:text="#{login_worker}"></h3>
         <div class="language-select-container">
             <form th:action="@{/util/changeSessionLanguage}" method="POST">
-                <input name="lang" type="hidden" value="zh_tw"  />
+                <input name="lang" type="hidden" value="zh_TW"  />
                 <button>中文</button>
             </form>
             <form th:action="@{/util/changeSessionLanguage}" method="POST">
-                <input name="lang" type="hidden" value="en_us" />
-                <button>Tiếng Việt</button>
+                <input name="lang" type="hidden" value="vi_VN" />
+                <button class="vi_vn_btn" style="font-family: Verdana;">Tiếng Việt</button>
+            </form>
+            <form th:action="@{/util/changeSessionLanguage}" method="POST">
+                <input name="lang" type="hidden" value="en_US" />
+                <button>English</button>
             </form>
         </div>
         <form class="login-form" th:action="@{/login}" method="POST">
             <div class="input-group">
-                <input id="input-username" class="input-username login-form" type="text" placeholder="操作人員" name="username" autocomplete="off" autofocus="autofocus">
+                <!-- <input id="input-username" class="input-username login-form" type="text" placeholder="操作人員" name="username" autocomplete="off" autofocus="autofocus"> -->
+                <input id="input-username" class="input-username login-form" type="text" th:placeholder="#{login_worker}" name="username" autocomplete="off" autofocus="autofocus">
             </div>
             <div class="login-action">
-                <button id="login-btn1" class="op-btn" name="process" value="SHER">剪床</button>
-                <button id="login-btn2" class="op-btn" name="process" value="PNCH">沖孔</button>
-                <button id="login-btn3" class="op-btn" name="process" value="BEND">折床</button>
-                <button id="login-btn4" class="op-btn" name="process" value="VCUT">刨溝</button>
-                <button id="login-btn5" class="op-btn" name="process" value="WELD">焊接</button>
+                <!-- <button id="login-btn1" class="op-btn login-btn" name="process" value="SHER" th:text="#{process_shear}"></button> -->
+                <!-- <button id="login-btn2" class="op-btn login-btn" name="process" value="PNCH" th:text="#{process_punch}"></button> -->
+                <button id="login-btn3" class="op-btn login-btn" name="process" value="BEND" th:text="#{process_bend}"></button>
+                <!-- <button id="login-btn4" class="op-btn login-btn" name="process" value="VCUT" th:text="#{process_vcut}"></button> -->
+                <!-- <button id="login-btn5" class="op-btn login-btn" name="process" value="WELD" th:text="#{process_weld}"></button> -->
             </div>
         </form>
         <div class="error-msg" th:if="${param.error}">
-            <span>尚無註冊此員工資訊，請通知生管人員</span>
+            <!-- <span>尚無註冊此員工資訊，請通知生管人員</span> -->
+            <span th:text="#{login_error}"></span>
         </div>
+        <div id="lang-info" style="display: none;" th:text=${session.localeLang}></div>
     </div>
+    <script th:src="@{/assets/plugins/jquery/jquery.js}" type="text/javascript"></script>
+    <script>
+        $(function () {
+            customizeFor18n();
+        })
+
+        function customizeFor18n() {
+            console.log($('#lang-info').text());
+            if($('#lang-info').text().toString().includes('en_US')){
+                $('.login-btn').css('font-size','36px');
+            } else if($('#lang-info').text().toString().includes('vi_VN')){
+                $('body').css('font-family','Vernada');
+                $('h3').css('font-family','Vernada');
+                $('.login-btn').css('font-family','Vernada');
+                $('.login-btn').css('font-size','32px');
+                $('.input-group input').css('font-family','Vernada');
+            }
+        }
+    </script>
 </body>
 </html>
-
-<!-- <h3 class="login-title">操作人員</h3>
-<div class="input-group">
-    <input id="input-username" class="input-username" type="text" placeholder="操作人員" name="username" autocomplete="off">
-</div>
-<div class="language-select-container">
-    <form th:action="@{/util/changeSessionLanguage}" method="POST">
-        <input name="lang" type="hidden" value="zh_tw"  />
-        <button>中文</button>
-    </form>
-    <form th:action="@{/util/changeSessionLanguage}" method="POST">
-        <input name="lang" type="hidden" value="en_us" />
-        <button>Tiếng Việt</button>
-    </form>
-</div>
-<div class="confirm-btn-container">
-    <button id="login-btn" class="op-btn">確認</button>
-</div>
-<div class="error-msg" th:if="${param.error}">
-    <span>Invalid account or password</span>
-</div> -->

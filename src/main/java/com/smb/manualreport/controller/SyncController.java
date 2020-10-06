@@ -22,12 +22,12 @@ public class SyncController {
 
 //    ***** 上班時間每兩小時執行一次 *****
 //    @Scheduled(cron = "0 0 8,10,12,14,16 * * *")
-    @RequestMapping("/tool/syncOrderTest")
+    @RequestMapping("/tool/preSyncDispatch")
     @ResponseBody
     public ResponseEntity<String> syncDispatchOrder(HttpServletRequest request){
         logger.info(">>> Start to sync dispatch order from smbsource.");
-        for(String s : Constant.JUJIANG_PROCESS_STEP){
-            dispatchInfoService.SyncDispatchOrderFromSourceToOP(s, request.getSession().getId());
+        for(String step : Constant.JUJIANG_PROCESS_STEP){
+            dispatchInfoService.SyncDispatchOrderFromSourceToOP(Constant.JUJIANG_PROCESS_MAP.get(step), request.getSession().getId());
         }
         return ResponseEntity.ok("Sync Done");
     }

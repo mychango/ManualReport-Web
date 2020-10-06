@@ -174,14 +174,13 @@ public class WorkTrackController {
         String returnStr;
         switch(customConfig.getCode()){
             case "YJX":
-                returnStr = "jobFinish3";
+                returnStr = "jobFinish2";
                 break;
             case "VIC":
             default:
                 returnStr = "jobFinish2";
         }
         return returnStr;
-//        return "jobFinish2";
     }
 
 }

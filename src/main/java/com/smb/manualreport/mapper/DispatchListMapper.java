@@ -11,8 +11,8 @@ public interface DispatchListMapper {
     @Insert("insert into smb_op.dispatch_list " +
         "(dispatch_id, material_id, total_cnt, finish_cnt, assign_worker, assign_machine, expect_finish_dt, actual_finish_dt, process_step, status, expect_start_dt, mfgorder_id)" +
         "values " +
-        "(#{srcDispatchOrder.dispatchId}, #{srcDispatchOrder.materialId}, #{srcDispatchOrder.expectAmount}, null, #{srcDispatchOrder.expectWorker}, #{srcDispatchOrder.expectMachine}, #{srcDispatchOrder.expectOffline}, null, #{srcDispatchOrder.processStep}, 'Wait', #{srcDispatchOrder.expectOnline}, #{srcDispatchOrder.mfgorderId})")
-    int insertDispatchList(@Param("srcDispatchOrder") SrcDispatchOrder srcDispatchOrder);
+        "(#{srcDispatchOrder.dispatchId}, #{srcDispatchOrder.materialId}, #{srcDispatchOrder.expectAmount}, null, #{srcDispatchOrder.expectWorker}, #{srcDispatchOrder.expectMachine}, #{srcDispatchOrder.expectOffline}, null, #{srcDispatchOrder.processStep}, #{status}, #{srcDispatchOrder.expectOnline}, #{srcDispatchOrder.mfgorderId})")
+    int insertDispatchList(@Param("srcDispatchOrder") SrcDispatchOrder srcDispatchOrder, @Param("status") String status);
 
     @Select("<script>"
             + "select * from smb_op.dispatch_list where 1 = 1 "
@@ -63,5 +63,8 @@ public interface DispatchListMapper {
 
     @Select("select assign_worker from smb_op.dispatch_list where uuid = #{uuid}")
     String findAssignWorkerByUUID(@Param("uuid") String uuid);
+
+    @Delete("delete from smb_op.dispatch_list where mfgorder_id = #{mfgorderId} and process_step = #{processStep}")
+    int deleteDispatchOrderByMfgOrderAndProcess(@Param("mfgorderId") String mfgorderId, @Param("processStep") String processStep);
 
 }
