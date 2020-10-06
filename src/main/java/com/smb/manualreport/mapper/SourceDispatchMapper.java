@@ -9,7 +9,24 @@ import java.util.List;
 
 public interface SourceDispatchMapper {
 
-    @Select("select p.mo_id as mfgorder_id, p.dp_id as dispatch_id, q.part_id as material_id, q.expect_amount, p.expect_worker, p.expect_machine, p.expect_online, p.expect_offline, p.mp_id as process_step from smbsource.dispatch_order p left join smbsource.manufacture_part q on q.dp_id = p.dp_id and q.mo_id = p.mo_id and q.mp_id = p.mp_id where p.expect_online is not null and p.expect_offline is not null and p.mp_id = #{processStep} and p.last_update_date > #{lastQueryTime}")
+//    @Select("select p.mo_id as mfgorder_id, p.dp_id as dispatch_id, q.part_id as material_id, q.expect_amount, p.expect_worker, p.expect_machine, p.expect_online, p.expect_offline, p.mp_id as process_step from smbsource.dispatch_order p left join smbsource.manufacture_part q on q.dp_id = p.dp_id and q.mo_id = p.mo_id and q.mp_id = p.mp_id where p.expect_online is not null and p.expect_offline is not null and p.mp_id = #{processStep} and p.last_update_date > #{lastQueryTime}")
+//    List<SrcDispatchOrder> findDispatchOrderByProcessAndTime(@Param("processStep") String processStep, @Param("lastQueryTime") String lastQueryTime);
+
+    //2020-09-27 smb source schema change
+    @Select("select do.mo_id   as mfgorder_id, " +
+            "       do.dp_id   as dispatch_id, " +
+            "       do.part_id as material_id, " +
+            "       do.amount  as expect_amount, " +
+            "       do.expect_worker, " +
+            "       do.expect_machine, " +
+            "       do.expect_online, " +
+            "       do.expect_offline, " +
+            "       do.mp_id   as process_step " +
+            "from smbsource.dispatch_order do " +
+            "where do.expect_online is not null " +
+            "  and do.expect_offline is not null " +
+            "  and do.mp_id = #{processStep} " +
+            "  and do.last_update_date > #{lastQueryTime}")
     List<SrcDispatchOrder> findDispatchOrderByProcessAndTime(@Param("processStep") String processStep, @Param("lastQueryTime") String lastQueryTime);
 
     @Select("select p.mo_id as mfgorder_id, p.dp_id as dispatch_id, q.part_id as material_id, q.expect_amount, p.expect_worker, p.expect_machine, p.expect_online, p.expect_offline, p.mp_id as process_step from smbsource.dispatch_order p left join smbsource.manufacture_part q on q.dp_id = p.dp_id and q.mo_id = p.mo_id and q.mp_id = p.mp_id where p.mp_id = #{processStep} and p.expect_worker = #{workerId}")
@@ -24,7 +41,11 @@ public interface SourceDispatchMapper {
     @Select("select p.mo_id as mfgorder_id, p.dp_id as dispatch_id, q.part_id as material_id, q.expect_amount, p.expect_worker, p.expect_machine, p.expect_online, p.expect_offline, p.mp_id as process_step from smbsource.manufacture_part q left join smbsource.dispatch_order p on q.dp_id = p.dp_id and q.mo_id = p.mo_id and q.mp_id = p.mp_id where p.expect_online is not null and p.expect_offline is not null and p.mp_id = #{processStep} and q.po_id = #{orderId} and p.last_update_date > #{lastQueryTime}")
     List<SrcDispatchOrder> findDispatchOrderByProcessAndOrderAndTime(@Param("processStep") String processStep, @Param("orderId") String orderId, @Param("lastQueryTime") String lastQueryTime);
 
-    @Select("select mo_id from smbsource.manufacture_part where po_id = #{orderId} group by po_id, mo_id")
+//    @Select("select mo_id from smbsource.manufacture_part where po_id = #{orderId} group by po_id, mo_id")
+//    List<String> findMfgOrderIdByProductOrder(@Param("orderId") String orderId);
+
+    //2020-09-27 smb source schema change
+    @Select("select mo_id from smbsource.manufacture_order where po_id = #{orderId}")
     List<String> findMfgOrderIdByProductOrder(@Param("orderId") String orderId);
 
 }

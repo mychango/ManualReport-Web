@@ -61,7 +61,7 @@
                         <th style="display: none;">UUID</th>
                     </tr>
                 </thead>
-                <tbody>
+                <!-- <tbody>
                     <tr th:each="m:${listOpDispatchOrder}" row="role" th:class="${m.dispatchId}">
                         <td class="task-content first-col"></td>
                         <td class="task-content" th:text="${m.mfgorderId}"></td>
@@ -73,7 +73,7 @@
                         <td class="task-content last-col" th:text="${m.expectFinishDt}"></td>
                         <td th:text="${m.uuid}" style="display: none;"></td>
                     </tr>
-                </tbody>
+                </tbody> -->
             </table>
         </div>
         <div class="bottom-button-container">
@@ -127,7 +127,6 @@
         })
 
         function customizeFor18n() {
-            console.log($('#lang-info').text());
             if($('#lang-info').text().toString().includes('en_US')){
                 $('.bottom-button-container button').css('width', '240px');
                 $('.bottom-button-container button').css('height', '150px');
@@ -168,6 +167,7 @@
         var selectedData;
         var dispatchUUID;
         var stop;
+        var machineId;
 
         $(document).ready(function() {
             $('#dispatch-order-table tbody tr').removeClass('selected');
@@ -176,26 +176,73 @@
             $('#manual-keyin-btn').attr('disabled', true);
             $('#select-task-btn').attr('disabled', true);
 
+            var workInfo = $('#top-worker-info').text().toString().split("/");
+            if (workInfo.length > 2) {
+                machineId = workInfo[2];
+            } else {
+                machineId = null;
+            }
+
             dt = $('#dispatch-order-table').DataTable({
                 // responsive: true,
                 lengthChange: false,
                 paging: false,
                 searching: true,
+                serverSide: true,
                 info: false,
                 // autoFill: true,
-                columnDefs: [{
-                    orderable: false,
-                    className: 'select-checkbox',
-                    targets: 0
-                }],
+                ajax: {
+                    url: '/task/findDispatchList',
+                    method: 'POST',
+                    data : function(d) {
+                        d.selectMachine = machineId;
+                    },
+                    dataSrc: 'data'
+                },
+                columnDefs: [
+                    {
+                        orderable: false,
+                        className: 'select-checkbox task-content first-col',
+                        targets: 0
+                    },
+                    {   targets: 1, className: 'task-content'  },
+                    {   targets: 2, className: 'task-content'  },
+                    {   targets: 3, className: 'task-content'  },
+                    {   targets: 4, className: 'task-content'  },
+                    {   targets: 5, className: 'task-content'  },
+                    {   targets: 6, className: 'task-content'  },
+                    {   targets: 7, className: 'task-content last-col'  },
+                    {   targets: 8, className: 'task-content'  },
+                ],
                 select: true,
-                // select: {
-                //     style:    'os',
-                //     selector: 'td:first-child'
-                // }
                 "drawCallback" : function( settings ) {
+                    $('#dispatch-order-table thead th').removeClass('task-content');
                     customizeTableStyle();
-                }
+                },
+                columns: [
+                    {
+                        "orderable":      false,
+                        "data":           null,
+                        "defaultContent": ""
+                    },
+                    { data: 'mfgorderId'},
+                    { data: 'dispatchId'},
+                    { data: 'materialId'},
+                    {
+                        "render": function ( data, type, row, meta ) {
+				        	var num = row.finishCnt;
+                            if (num === null){
+                                return 0;
+                            } else {
+                                return num;
+                            }			        		
+                        } 
+                    },
+                    { data: 'totalCnt'},
+                    { data: 'status'},
+                    { data: 'expectFinishDt'},
+                    { data: 'uuid', "visible": false}
+                ]
             });
 
             dt.on('select', function(e, tb, type, indexes){

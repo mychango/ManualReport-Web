@@ -4,7 +4,7 @@ public class ProductOrder {
     private String poId;
     private String customerName;
     private String customerCode;
-    private String rawState;
+    private int rawState;
 
     public String getPoId() {
         return poId;
@@ -30,11 +30,11 @@ public class ProductOrder {
         this.customerCode = customerCode;
     }
 
-    public String getRawState() {
+    public int getRawState() {
         return rawState;
     }
 
-    public void setRawState(String rawState) {
+    public void setRawState(int rawState) {
         this.rawState = rawState;
     }
 }

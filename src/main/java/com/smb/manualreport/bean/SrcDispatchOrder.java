@@ -13,6 +13,18 @@ public class SrcDispatchOrder implements Serializable {
     private String expectMachine;
     private String processStep;
 
+    public SrcDispatchOrder(String dispatchId, String mfgorderId, String materialId, Integer expectAmount, String expectOnline, String expectOffline, String expectWorker, String expectMachine, String processStep) {
+        this.dispatchId = dispatchId;
+        this.mfgorderId = mfgorderId;
+        this.materialId = materialId;
+        this.expectAmount = expectAmount;
+        this.expectOnline = expectOnline;
+        this.expectOffline = expectOffline;
+        this.expectWorker = expectWorker;
+        this.expectMachine = expectMachine;
+        this.processStep = processStep;
+    }
+
     public String getMfgorderId() {
         return mfgorderId;
     }
